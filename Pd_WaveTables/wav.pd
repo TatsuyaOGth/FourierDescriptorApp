@@ -1,0 +1,53 @@
+#N canvas 0 22 1280 752 10;
+#X obj 585 161 counter;
+#X msg 596 126 goto 0;
+#X obj 507 119 t f b;
+#X obj 507 58 OSCroute /bits /set;
+#X obj 595 102 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X floatatom 754 199 0 0 0 0 - - -;
+#X obj 754 227 mtof;
+#X floatatom 752 256 0 0 0 0 - - -;
+#X obj 806 24 inlet;
+#X obj 746 418 outlet~;
+#N canvas 0 22 450 278 (subpatch) 0;
+#X array \$0-wav 259 float 1;
+#A 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0;
+#X coords 0 1 259 -1 190 150 1 0 0;
+#X restore 22 2 graph;
+#X obj 748 294 tabosc4~ \$0-wav;
+#X obj 386 4 inlet;
+#X obj 385 50 route set;
+#X obj 506 199 tabwrite \$0-wav;
+#X obj 366 202 tabwrite \$0-wav;
+#X obj 364 143 uzi 255;
+#X obj 363 121 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X msg 364 171 0;
+#X text 388 121 init wave;
+#X connect 0 0 14 1;
+#X connect 1 0 0 0;
+#X connect 2 0 14 0;
+#X connect 2 1 0 0;
+#X connect 3 0 2 0;
+#X connect 3 1 4 0;
+#X connect 4 0 1 0;
+#X connect 5 0 6 0;
+#X connect 6 0 7 0;
+#X connect 7 0 11 0;
+#X connect 8 0 5 0;
+#X connect 11 0 9 0;
+#X connect 12 0 13 0;
+#X connect 13 0 17 0;
+#X connect 16 0 18 0;
+#X connect 16 2 15 1;
+#X connect 17 0 16 0;
+#X connect 18 0 15 0;
+#X coords 0 -1 1 1 300 300 1 20 0;
