@@ -9,8 +9,9 @@
 
 /** 波形パラメータ構造体 */
 typedef struct _wave{
-    float dist;
-    float bit;
+    double dist;
+    double bit;
+    ofPoint contPts; //!<計算した輪郭座標点配列
 } wave;
 
 /** Fieldを示す列挙型 */

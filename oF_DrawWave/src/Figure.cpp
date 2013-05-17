@@ -8,27 +8,6 @@
 
 #include "Figure.h"
 
-/**
- コンストラクタ
- @param pts 輪郭点の配列
- */
-Figure::Figure(const vector<ofPoint> pts, const int ID)
-{
-    if (pts.size()) {
-        mPts = pts;
-    } else {
-        cout << "[ERROR] points null" << endl;
-    }
-    
-    mID = ID;
-}
-
-/**
- デストラクタ
- */
-Figure::~Figure()
-{
-}
 
 /**
  更新
@@ -71,12 +50,36 @@ void Figure::draw()
 void Figure::debugDraw()
 {
     ofPushStyle();
-    for (int i=0; i < mPts.size(); i++) {
+    for (int i=0; i < mEdgePts.size(); i++) {
         ofFill();
         ofSetColor(255, 0, 0);
-        ofCircle(mPts[i], 2);
+        ofCircle(mEdgePts[i], 2);
     }
     ofPopStyle();
+}
+
+/**
+ IDをセット
+ */
+void Figure::setID(const int ID)
+{
+    mID = ID;
+}
+
+/**
+ 手書き線座標配列をセット
+ */
+void Figure::setPts(const vector<ofPoint> pts)
+{
+    mPts = pts;
+}
+
+/**
+ 実際に計算に使用した輪郭点を取得
+ */
+void Figure::setEdgePts(const vector<ofPoint> edgePts)
+{
+    mEdgePts = edgePts;
 }
 
 
@@ -86,9 +89,9 @@ void Figure::debugDraw()
 bool Figure::getAlive()
 {
     if (mPts.size() > 0) {
-        return true;
-    } else {
         return false;
+    } else {
+        return true;
     }
 }
 

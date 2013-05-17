@@ -21,7 +21,7 @@ void testApp::setup()
     //----------
     // 初期化
     //----------
-    mInterval = 15;
+    mInterval = 30;
     bDebugMode = true;
     bDrawing = false;
     bProcessGetDraw = false;
@@ -179,8 +179,35 @@ void testApp::draw()
             //----------
             // Figureクラスのインスタンスを生成して輪郭座標点を渡す
             //----------
+            Figure tmpF;
+            tmpF.setID(1);
             
+            //円モードの場合は計算に使用した輪郭点を描画点として置き換える
+            if (bCircleMode) {
+            
+                vector<ofPoint> edgePts;
+                for (int i=0; i < mEdgeBits.size(); i++) {
+                    edgePts.push_back(mEdgeBits[i].contPts);
+                }
+                tmpF.setPts(edgePts);
+                tmpF.setEdgePts(edgePts);
+            
+            } else {
+            
+                //計算に使用した輪郭点座標を元の大きさにスケーリングして取得
+                vector<ofPoint> edgePts;
+                for (int i=0; i < mEdgeBits.size(); i++) {
+                    ofPoint tmpPoint;
+                    tmpPoint.set(ofMap(mEdgeBits[i].contPts.x, scaleRect.x, scaleRect.width, minX, maxX),
+                                 ofMap(mEdgeBits[i].contPts.y, scaleRect.y, scaleRect.height, minY, maxY));
+                    edgePts.push_back(tmpPoint);
+                }
+                tmpF.setEdgePts(edgePts);
+                tmpF.setPts(mPts);
 
+            }
+            mFigures.push_back(tmpF);
+            mPts.clear();
             
             //tmp
             mScaleRect = scaleRect;
@@ -196,17 +223,6 @@ void testApp::draw()
     //====================
         
     } else {
-        
-        
-        //----------
-        // デバッグ表示1
-        //----------
-//        if (!bDrawing){
-//            ofPushStyle();
-//            ofSetColor(40);
-//            if (mGrabImage.isAllocated()) mGrabImage.draw(0, 0);
-//            ofPopStyle();
-//        }
         
         //----------
         // ルーラー
@@ -231,11 +247,6 @@ void testApp::draw()
                 ofLine(0, i, ofGetWidth(), i);
             }
         }
-
-//        ofPushMatrix();
-        mCamera.begin();
-//        mCamera.setPosition(0, 0, -100);
-//        mCamera.lookAt(ofPoint(0,0,0));
         
         //描画中
         if (bDrawing) {
@@ -299,8 +310,7 @@ void testApp::draw()
             }
         }
         
-        mCamera.end();
-//        ofPopMatrix();
+
         
     }
     
@@ -618,36 +628,34 @@ vector<wave> testApp::getShapeFrequency(const ofImage src, unsigned interval)
     //----------
     // 指定した間隔毎のポイントから開始点との角度を取得
     //----------
-    float dist = 0.0f;
+    double dist = 0.0f;
     //開始点の0を追加
     wave first;
     first.bit = 0.0;
     first.dist = 0.0;
+    first.contPts.set(pts[0]);
     dst.push_back(first);
     tPos.set(pts[0]);
-    if (bCircleMode) mPts.clear();
 
     //一周分指定した間隔で前角度を計算
     for (int i=0; i < pts.size(); i++) {
         wave dstWave;
         //開始点との（輪郭線上の）距離を計算
-        float tDist = ofDist(tPos.x, tPos.y, pts[i].x, pts[i].y);
+        double tDist = ofDist(tPos.x, tPos.y, pts[i].x, pts[i].y);
         //もし間隔が一定以上出ない場合はその点を除外
         if (tDist < interval) continue;
         dist += tDist;
         dstWave.dist = dist;
         //角度を計算
-        float rnd = atan2f((float)(pts[i].y - tPos.y),(float)(pts[i].x - tPos.x));
+        double rnd = atan2((double)(pts[i].y - tPos.y),(double)(pts[i].x - tPos.x));
         dstWave.bit = sin(rnd);
+        //輪郭座標を取得
+        dstWave.contPts.set(pts[i]);
         //出力配列に代入
         dst.push_back(dstWave);
         //値を保持
         tPos = pts[i];
         
-        //サークルモードの時はmPtsを置き換える
-        if (bCircleMode) {
-            mPts.push_back(pts[i]);
-        }
     }
     
     return dst;
@@ -852,13 +860,31 @@ void testApp::sendBits()
 {
     if (mEdgeBits.size()) {
         
+//        if (mEdgeBits.size() > 255) {
+//            for (int i=0; i < 255; i++) {
+//                ofxOscMessage _m;
+//                _m.setAddress("/bit");
+//                int j = i % mEdgeBits.size();
+//                _m.addFloatArg(mEdgeBits[j].bit);
+//                _m.addIntArg(i);
+//                sender.sendMessage(_m);
+//            }
+//        } else {
+        
+
+        double tBit = 0;
         for (int i=0; i < 255; i++) {
             ofxOscMessage _m;
-            _m.setAddress("/bits");
-            int j = i % mEdgeBits.size();
+            _m.setAddress("/bit");
+   
+            int j = (int)(ofMap(i, 0, 255, 0, mEdgeBits.size()));
             _m.addFloatArg(mEdgeBits[j].bit);
+            _m.addIntArg(i);
+            
             sender.sendMessage(_m);
         }
+        
+//        }
         
 //        m.setAddress("/bits");
 //        for (int i=0; i < 255; i++) {

@@ -1,0 +1,46 @@
+#N canvas 382 514 749 571 10;
+#N canvas 0 22 450 278 (subpatch) 0;
+#X array \$0-scope 259 float 3;
+#A 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0;
+#X coords 0 1 258 -1 200 140 1 0 0;
+#X restore 50 50 graph;
+#X obj 334 223 metro 20;
+#X obj 255 74 tgl 15 0 empty empty empty 17 7 0 10 -262144 -1 -1 0
+1;
+#X obj 338 25 loadbang;
+#X text 253 53 ON/OFF;
+#X obj 400 222 inlet~;
+#X obj 333 279 tabwrite~ \$0-scope;
+#X text 253 100 SIZE;
+#X floatatom 254 119 5 0 0 0 - - -;
+#X msg 316 64 500;
+#X obj 477 225 pack f f;
+#X obj 379 56 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 521 190 float \$0;
+#X msg 478 262 \; \$2-scope resize \$1;
+#X text 251 143 INTERBAL;
+#X floatatom 255 159 5 0 0 0 - - -;
+#X msg 346 67 20;
+#X connect 1 0 6 0;
+#X connect 2 0 1 0;
+#X connect 3 0 2 0;
+#X connect 3 0 9 0;
+#X connect 3 0 11 0;
+#X connect 3 0 16 0;
+#X connect 5 0 6 0;
+#X connect 8 0 10 0;
+#X connect 9 0 8 0;
+#X connect 10 0 13 0;
+#X connect 11 0 12 0;
+#X connect 12 0 10 1;
+#X connect 15 0 1 1;
+#X connect 16 0 15 0;
+#X coords 0 -1 1 1 250 140 1 50 50;

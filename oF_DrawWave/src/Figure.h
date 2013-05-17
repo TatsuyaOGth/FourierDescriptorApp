@@ -19,15 +19,15 @@
  */
 class Figure {
 public:
-    
-    Figure(const vector<ofPoint> pts, const int ID);
-    ~Figure();
-    
+
     void update();
     void draw();
     void debugDraw();
     void sendPlay();
     
+    void setID(const int ID);
+    void setPts(const vector<ofPoint> pts);
+    void setEdgePts(const vector<ofPoint> edgePts);
     int getID(){return mID;};
     bool getAlive();
     
@@ -36,6 +36,7 @@ private:
     int mID;
     ofxVectorGraphics mVecOut;
     vector<ofPoint> mPts;
+    vector<ofPoint> mEdgePts;
         
 };
 
