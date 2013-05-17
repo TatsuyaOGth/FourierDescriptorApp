@@ -27,8 +27,7 @@ void testApp::setup()
     bProcessGetDraw = false;
     bCircleMode = false;
     mPtsRect.set(-1, -1, -1, -1);
-    mMouseX = 0.0;
-    mMouseY = 0.0;
+    field = DRUMS;
     
     //osc
     sender.setup(HOST, PORT);
@@ -48,7 +47,6 @@ void testApp::setup()
 	mScaledVol		= 0.0;
 	mSoundStream.setup(this, 0, 2, 44100, mBufferSize, 4);
 
-    
 }
 
 void testApp::update()
@@ -85,6 +83,7 @@ void testApp::draw()
     //=====================
     if (bProcessGetDraw) {
         bool bError = false;
+        mTmpWindow.grabScreen(0, 0, ofGetWidth(), ofGetHeight()); //表示中の画面を取得
         
         //----------
         // 描画がある場合は周波数表現の計算を開始
@@ -167,6 +166,7 @@ void testApp::draw()
             //スクリーンショット
             mGrabImage.grabScreen(0, 0, ofGetWidth(), ofGetHeight());
 //            mGrabImage.saveImage("test.tiff");
+            mTmpWindow.draw(0, 0); //元の画面を描画
             
             bProcessGetDraw = false;
             
@@ -196,6 +196,7 @@ void testApp::draw()
     //====================
         
     } else {
+        
         
         //----------
         // デバッグ表示1
@@ -231,6 +232,10 @@ void testApp::draw()
             }
         }
 
+//        ofPushMatrix();
+        mCamera.begin();
+//        mCamera.setPosition(0, 0, -100);
+//        mCamera.lookAt(ofPoint(0,0,0));
         
         //描画中
         if (bDrawing) {
@@ -249,11 +254,11 @@ void testApp::draw()
                     ofLine(0, i, 10, i);
             }
             ofSetColor(120, 150, 120);
-            ofLine(mMouseX, 0, mMouseX, ofGetHeight());
-            ofLine(0, mMouseY, ofGetWidth(), mMouseY);
+            ofLine(mouseX, 0, mouseX, ofGetHeight());
+            ofLine(0, mouseY, ofGetWidth(), mouseY);
             ofSetColor(220);
-            ofDrawBitmapString(ofToString(mMouseX, 2), mMouseX+10, 25);
-            ofDrawBitmapString(ofToString(mMouseY, 2), 15, mMouseY+10);
+            ofDrawBitmapString(ofToString(mouseX, 2), mouseX+10, 25);
+            ofDrawBitmapString(ofToString(mouseY, 2), 15, mouseY+10);
         }
         ofPopStyle();
         
@@ -294,12 +299,14 @@ void testApp::draw()
             }
         }
         
+        mCamera.end();
+//        ofPopMatrix();
+        
     }
     
     if (bDebugMode) {
         debugDraw();
     }
-
 }
 
 /**
@@ -317,34 +324,35 @@ void testApp::debugDraw()
         ofSetLineWidth(1);
         ofSetColor(0, 255, 0, 255);
         ofNoFill();
-        //            ofRect(mPtsRect);
-        //            ofDrawBitmapString("Bounds", mPtsRect.x, mPtsRect.y+mPtsRect.height+10);
         
         ofSetColor(255, 255, 0, 255);
         ofNoFill();
-        //            ofRect(mScaleRect);
-        //            ofDrawBitmapString("Scaling bounds", mScaleRect.width-160, mScaleRect.height-12);
-        
         
         //波形を描画
-        ofPoint tPos = ofPoint(0, ofGetHeight()/2);
         ofSetColor(127, 127, 255);
-        //ofSetLineWidth(2);
+        ofSetLineWidth(1);
+        ofPushMatrix();
+        ofTranslate(400, 10);
+        ofPoint tPos = ofPoint(0, 100/2);
         for (int i=0; i < mEdgeBits.size(); i++){
-            float j = ofMap(mEdgeBits[i].dist, 0, mEdgeBits[mEdgeBits.size()-1].dist, 0, ofGetWidth());
-            ofPoint pos = ofPoint(j, mEdgeBits[i].bit * 250 + (ofGetHeight()/2));
+            float j = ofMap(mEdgeBits[i].dist, 0, mEdgeBits[mEdgeBits.size()-1].dist, 0, 200);
+            ofPoint pos = ofPoint(j, mEdgeBits[i].bit * 50 + (100/2));
             ofLine(tPos, pos);
             tPos.set(pos);
             if (i == mEdgeBits.size()-1) {
-                ofLine(tPos.x, tPos.y, ofGetWidth(), ofGetHeight()/2);
+                ofLine(tPos.x, tPos.y, 200, 100/2);
             }
         }
+        ofSetColor(255);
+        ofRect(0, 0, 200, 100);
+        ofPopMatrix();
         
         
     }
     str << "display width   : " << ofGetWidth() << endl
     << "display height  : " << ofGetHeight() << endl
     << "Points Interval : " << mInterval << endl
+    << "Field           : " << field << endl
     ;
     if (bCircleMode) str << "Circle Mode ON" << endl;
     ofSetColor(255);
@@ -438,7 +446,15 @@ void testApp::keyPressed(int key){
             break;
             
         case '1':
+            field = DRUMS;
             break;
+        case '2':
+            field = HARM;
+            break;
+        case '3':
+            field = MELO;
+            break;
+
     }
 }
 
@@ -448,8 +464,6 @@ void testApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y ){
-    mMouseX = x;
-    mMouseY = y;
 }
 
 //--------------------------------------------------------------

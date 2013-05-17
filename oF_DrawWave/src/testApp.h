@@ -13,6 +13,13 @@ typedef struct _wave{
     float bit;
 } wave;
 
+/** Fieldを示す列挙型 */
+enum Fields {
+    DRUMS = 0,
+    HARM = 1,
+    MELO = 2
+};
+
 /**
  メインクラス
  @class testApp
@@ -49,6 +56,7 @@ private:
     ofxVectorGraphics mVecOut;
     vector<ofPoint> mPts; //!< 描画した線の点配列
     ofImage mGrabImage;
+    ofImage mTmpWindow;
     vector<wave> mEdgeBits; //!< mPtsを波形変換したもの
     unsigned int mInterval;
     
@@ -59,14 +67,15 @@ private:
     bool bProcessGetDraw;
     bool bCircleMode;
     
+    
     vector<Figure> mFigures;
+    
+    //fields
+    Fields field;
     
     //osc
     ofxOscSender sender;
     
-    //temp
-    float mMouseX, mMouseY;
-    ofImage tmpBackImg;
     
     //Audio in
     vector <float> mLefts;
@@ -77,5 +86,7 @@ private:
     float mSmoothedVol;
     float mScaledVol;
     ofSoundStream mSoundStream;
+    
+    ofCamera mCamera;
     
 };
