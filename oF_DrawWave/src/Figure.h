@@ -26,14 +26,17 @@ public:
     void sendPlay();
     
     void setID(const int ID);
+    void setMode(const int mode);
     void setPts(const vector<ofPoint> pts);
     void setEdgePts(const vector<ofPoint> edgePts);
     int getID(){return mID;};
+    int getMode(){return mMode;};
     bool getAlive();
     
 private:
     
     int mID;
+    int mMode;
     ofxVectorGraphics mVecOut;
     vector<ofPoint> mPts;
     vector<ofPoint> mEdgePts;

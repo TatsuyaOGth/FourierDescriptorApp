@@ -67,6 +67,14 @@ void Figure::setID(const int ID)
 }
 
 /**
+ モードをセット
+ */
+void Figure::setMode(const int mode)
+{
+    mMode = mode;
+}
+
+/**
  手書き線座標配列をセット
  */
 void Figure::setPts(const vector<ofPoint> pts)

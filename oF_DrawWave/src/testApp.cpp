@@ -7,7 +7,8 @@ vector<ofPoint> getContourPoints(const ofPixels src);
 
 static const string         HOST = "localhost";
 static const unsigned int   PORT = 50000;
-static const int            MAX_FIG_ID = 15;
+static const unsigned int   MAX_FIGMODE1_ID = 20;
+static const unsigned int   MAX_FIGMODE2_ID = 3;
 
 //--------------------------------------------------------------
 void testApp::setup()
@@ -27,7 +28,8 @@ void testApp::setup()
     bProcessGetDraw = false;
     bCircleMode = false;
     mPtsRect.set(-1, -1, -1, -1);
-    field = DRUMS;
+    mFigMode = 1;
+    bIDMaxed = false;
     
     //osc
     sender.setup(HOST, PORT);
@@ -56,14 +58,26 @@ void testApp::update()
     // 形態を更新
     //----------
     //死んでた場合は配列から削除
-    for (int i=0; i < mFigures.size(); i++) {
-        if (mFigures[i].getAlive()) {
-            mFigures.erase(mFigures.begin()+i);
+    //Fig１
+    for (int i=0; i < mFigures1.size(); i++) {
+        if (mFigures1[i].getAlive()) {
+            mFigures1.erase(mFigures1.begin()+i);
             continue;
         }
     }
-    for (int i=0; i < mFigures.size(); i++)
-        mFigures[i].update();
+    for (int i=0; i < mFigures1.size(); i++)
+        mFigures1[i].update();
+    
+    //Fig2
+    for (int i=0; i < mFigures2.size(); i++) {
+        if (mFigures2[i].getAlive()) {
+            mFigures2.erase(mFigures2.begin()+i);
+            continue;
+        }
+    }
+    for (int i=0; i < mFigures2.size(); i++)
+        mFigures2[i].update();
+
     
     //----------
     // Sound
@@ -179,8 +193,56 @@ void testApp::draw()
             //----------
             // Figureクラスのインスタンスを生成して輪郭座標点を渡す
             //----------
+            //先に既に数がMaxじゃないか調べる
             Figure tmpF;
-            tmpF.setID(1);
+            
+            //モードをセット
+            tmpF.setMode(mFigMode);
+            
+            //IDをセット
+            tmpF.setID(-1); //仮登録
+            if (mFigMode == 1) {
+                if (mFigures1.empty()) {
+                    tmpF.setID(0);
+                } else {
+                    for (int i=0; i < MAX_FIGMODE1_ID; i++) {
+                        bool isIn = false;
+                        for (int j=0; j < mFigures1.size(); j++) {
+                            if (mFigures1[j].getID() == i) {
+                                isIn = true;
+                                break;
+                            }
+                        }
+                        if (!isIn) {
+                            tmpF.setID(i);
+                            break;
+                        }
+                    }
+                }
+            } else if (mFigMode == 2) {
+                if (mFigures2.empty()) {
+                    tmpF.setID(0);
+                } else {
+                    for (int i=0; i < MAX_FIGMODE2_ID; i++) {
+                        bool isIn = false;
+                        for (int j=0; j < mFigures2.size(); j++) {
+                            if (mFigures2[j].getID() == i) {
+                                isIn = true;
+                                break;
+                            }
+                        }
+                        if (!isIn) {
+                            tmpF.setID(i);
+                            break;
+                        }
+                    }
+                }
+            }
+            //最終チェック
+            if (tmpF.getID() == -1) {
+                cout << "[ERROR] ID is maxed" << endl;
+                goto JUMP;
+            }
             
             //円モードの場合は計算に使用した輪郭点を描画点として置き換える
             if (bCircleMode) {
@@ -206,11 +268,18 @@ void testApp::draw()
                 tmpF.setPts(mPts);
 
             }
-            mFigures.push_back(tmpF);
-            mPts.clear();
             
-            //tmp
-            mScaleRect = scaleRect;
+            //モード毎の配列に格納
+            switch (mFigMode) {
+                case 1:mFigures1.push_back(tmpF); break;
+                case 2:mFigures2.push_back(tmpF); break;
+            }
+            cout << tmpF.getID() << endl;
+            
+        JUMP:
+            
+            mPts.clear();
+
         }
     
     _FAILD_GET_DRAWING:
@@ -276,12 +345,21 @@ void testApp::draw()
         //----------
         // 形態を描画
         //----------
-        for (int i=0; i < mFigures.size(); i++) {
-            mFigures[i].draw();
+        //fig1
+        for (int i=0; i < mFigures1.size(); i++) {
+            mFigures1[i].draw();
             if (bDebugMode) {
-                mFigures[i].debugDraw();
+                mFigures1[i].debugDraw();
             }
         }
+        //fig2
+        for (int i=0; i < mFigures2.size(); i++) {
+            mFigures2[i].draw();
+            if (bDebugMode) {
+                mFigures2[i].debugDraw();
+            }
+        }
+
         
         if (bCircleMode) {
             //----------
@@ -309,9 +387,6 @@ void testApp::draw()
                 mVecOut.endShape();
             }
         }
-        
-
-        
     }
     
     if (bDebugMode) {
@@ -342,7 +417,7 @@ void testApp::debugDraw()
         ofSetColor(127, 127, 255);
         ofSetLineWidth(1);
         ofPushMatrix();
-        ofTranslate(400, 10);
+        ofTranslate(ofGetWidth()-266-110-210, 10);
         ofPoint tPos = ofPoint(0, 100/2);
         for (int i=0; i < mEdgeBits.size(); i++){
             float j = ofMap(mEdgeBits[i].dist, 0, mEdgeBits[mEdgeBits.size()-1].dist, 0, 200);
@@ -362,7 +437,8 @@ void testApp::debugDraw()
     str << "display width   : " << ofGetWidth() << endl
     << "display height  : " << ofGetHeight() << endl
     << "Points Interval : " << mInterval << endl
-    << "Field           : " << field << endl
+    << "Figure 1        : " << mFigures1.size() << endl
+    << "Figure 2        : " << mFigures2.size() << endl
     ;
     if (bCircleMode) str << "Circle Mode ON" << endl;
     ofSetColor(255);
@@ -415,6 +491,22 @@ void testApp::debugDraw()
     ofPopMatrix();
 	ofPopStyle();
 
+    //test
+//    ofPushStyle();
+//    int numPts = mLefts.size();
+//    int rescaleRes = 1;
+//    ofSetColor(255, 255, 255);
+//    mVecOut.fill();
+//    mVecOut.beginShape();
+//    int num
+//    for(int i = 0; i < numPts; i++){
+//        if(i == 0 || i == numPts -1){
+//            mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+//        }
+//        if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+//    }
+//    mVecOut.endShape();
+//    ofPopStyle();
     
 }
 
@@ -434,6 +526,15 @@ void testApp::keyPressed(int key){
             break;
         case OF_KEY_BACKSPACE:
         case OF_KEY_DEL:
+            if (mFigMode==1 && !mFigures1.empty()) {
+                sendFigMode(mFigMode);
+                sendDelete(mFigures1[0].getID());
+                mFigures1.erase(mFigures1.begin());
+            } else if (mFigMode==2 && !mFigures2.empty()) {
+                sendFigMode(mFigMode);
+                sendDelete(mFigures2[0].getID());
+                mFigures2.erase(mFigures2.begin());
+            }
             break;
         case 'f':
             ofToggleFullscreen();
@@ -456,13 +557,10 @@ void testApp::keyPressed(int key){
             break;
             
         case '1':
-            field = DRUMS;
+            mFigMode = 1;
             break;
         case '2':
-            field = HARM;
-            break;
-        case '3':
-            field = MELO;
+            mFigMode = 2;
             break;
 
     }
@@ -480,36 +578,63 @@ void testApp::mouseMoved(int x, int y ){
 void testApp::mouseDragged(int x, int y, int button){
 
     //----------
-    // 自由線を描画
+    // 既にFigureの数が最大じゃないか確認
     //----------
-    mPts.push_back(ofPoint());
-	int last = mPts.size()-1;
-	mPts[last].x = x;
-	mPts[last].y = y;
-    bDrawing = true;
+    if (bIDMaxed) {
+        
+        ofPushStyle();
+        ofSetColor(255, 0, 0);
+        ofDrawBitmapString("[ERROR] Fig"+ofToString(mFigMode)+"ID is maxed", x + 10, y);
+        ofPopStyle();
+        
+    } else {
+        //----------
+        // 自由線を描画
+        //----------
+        mPts.push_back(ofPoint());
+        int last = mPts.size()-1;
+        mPts[last].x = x;
+        mPts[last].y = y;
+        bDrawing = true;
+    }
 }
 
 //--------------------------------------------------------------
 void testApp::mousePressed(int x, int y, int button){
     
     //----------
-    // 自由線を描画
+    // 既にFigureの数が最大じゃないか確認
     //----------
-    mPts.clear();
-    mPts.push_back(ofPoint());
-	mPts[0].x = x;
-	mPts[0].y = y;
-    bDrawing = true;
+    if (mFigMode == 1 && mFigures1.size() == MAX_FIGMODE1_ID) {
+        cout << "[ERROR] Fig1 ID is maxed" << endl;
+        bIDMaxed = true;
+    } else if (mFigMode == 2 && mFigures2.size() == MAX_FIGMODE2_ID) {
+        cout << "[ERROR] Fig2 ID is maxed" << endl;
+        bIDMaxed = true;
+    } else {
     
-    //既に計算した輪郭座標配列は削除
-    if (mEdgeBits.size()) mEdgeBits.clear();
+        //----------
+        // 自由線を描画
+        //----------
+        mPts.clear();
+        mPts.push_back(ofPoint());
+        mPts[0].x = x;
+        mPts[0].y = y;
+        bDrawing = true;
+        
+        //既に計算した輪郭座標配列は削除
+        if (mEdgeBits.size()) mEdgeBits.clear();
+    }
 
 }
 
 //--------------------------------------------------------------
 void testApp::mouseReleased(int x, int y, int button){
-    bDrawing = false;
-    bProcessGetDraw = true;
+    if (!bIDMaxed) {
+        bDrawing = false;
+        bProcessGetDraw = true;
+    }
+    bIDMaxed = false;
 }
 
 //--------------------------------------------------------------
@@ -849,7 +974,32 @@ void testApp::sendSet()
 {
     ofxOscMessage m;
     m.setAddress("/set");
-    m.addStringArg("bang");
+    m.addStringArg("set");
+    sender.sendMessage(m);
+}
+
+/**
+ Figureモードを送信
+ @param mode figMode
+ */
+void testApp::sendFigMode(const int mode)
+{
+    ofxOscMessage m;
+    m.setAddress("/mode");
+    m.addIntArg(mode);
+    sender.sendMessage(m);
+}
+
+
+/**
+ 削除を送信
+ @param figID ID
+ */
+void testApp::sendDelete(const int figID)
+{
+    ofxOscMessage m;
+    m.setAddress("/del");
+    m.addIntArg(figID);
     sender.sendMessage(m);
 }
 

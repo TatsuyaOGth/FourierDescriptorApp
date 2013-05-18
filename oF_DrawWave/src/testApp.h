@@ -14,13 +14,6 @@ typedef struct _wave{
     ofPoint contPts; //!<計算した輪郭座標点配列
 } wave;
 
-/** Fieldを示す列挙型 */
-enum Fields {
-    DRUMS = 0,
-    HARM = 1,
-    MELO = 2
-};
-
 /**
  メインクラス
  @class testApp
@@ -51,6 +44,8 @@ private:
     void sendSet();
     void sendFigId(const int figId);
     void sendBits();
+    void sendFigMode(const int mode);
+    void sendDelete(const int figID);
     
     ofxControlPanel gui;
     
@@ -69,10 +64,11 @@ private:
     bool bCircleMode;
     
     
-    vector<Figure> mFigures;
-    
-    //fields
-    Fields field;
+    vector<Figure> mFigures1; //!< figモード1
+    vector<Figure> mFigures2; //!< figモード2
+    vector<vector<int> > mFigIDs; //!< (1)パターン (2)ID
+    int mFigMode;
+    bool bIDMaxed;
     
     //osc
     ofxOscSender sender;
