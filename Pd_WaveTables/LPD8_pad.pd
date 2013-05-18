@@ -1,0 +1,90 @@
+#N canvas 490 122 456 396 10;
+#X obj 41 96 pack;
+#X floatatom 127 255 5 0 0 0 - - -;
+#X floatatom 261 256 3 0 0 0 - - -;
+#X text 283 257 Ch.;
+#X obj 40 42 notein;
+#X floatatom 194 255 5 0 0 0 - - -;
+#X obj 42 121 route 60 62 64 65 67 69 71 72;
+#X obj 41 283 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X text 38 255 AKAI LPD8 pad;
+#X text 161 255 Note;
+#X text 228 255 Velo;
+#X obj 42 167 > 0;
+#X obj 42 192 sel 1;
+#X obj 75 283 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 76 167 > 0;
+#X obj 76 192 sel 1;
+#X obj 109 283 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 110 167 > 0;
+#X obj 110 192 sel 1;
+#X obj 143 283 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 144 167 > 0;
+#X obj 144 192 sel 1;
+#X obj 177 283 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 178 167 > 0;
+#X obj 178 192 sel 1;
+#X obj 211 283 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 212 167 > 0;
+#X obj 212 192 sel 1;
+#X obj 245 283 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 246 167 > 0;
+#X obj 246 192 sel 1;
+#X obj 279 283 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 280 167 > 0;
+#X obj 280 192 sel 1;
+#X obj 41 320 outlet;
+#X obj 75 346 outlet;
+#X obj 111 321 outlet;
+#X obj 145 347 outlet;
+#X obj 177 317 outlet;
+#X obj 211 343 outlet;
+#X obj 247 318 outlet;
+#X obj 281 344 outlet;
+#X connect 0 0 6 0;
+#X connect 4 0 5 0;
+#X connect 4 0 0 0;
+#X connect 4 1 1 0;
+#X connect 4 1 0 1;
+#X connect 4 2 2 0;
+#X connect 6 0 11 0;
+#X connect 6 1 14 0;
+#X connect 6 2 17 0;
+#X connect 6 3 20 0;
+#X connect 6 4 23 0;
+#X connect 6 5 26 0;
+#X connect 6 6 29 0;
+#X connect 6 7 32 0;
+#X connect 7 0 34 0;
+#X connect 11 0 12 0;
+#X connect 12 0 7 0;
+#X connect 13 0 35 0;
+#X connect 14 0 15 0;
+#X connect 15 0 13 0;
+#X connect 16 0 36 0;
+#X connect 17 0 18 0;
+#X connect 18 0 16 0;
+#X connect 19 0 37 0;
+#X connect 20 0 21 0;
+#X connect 21 0 19 0;
+#X connect 22 0 38 0;
+#X connect 23 0 24 0;
+#X connect 24 0 22 0;
+#X connect 25 0 39 0;
+#X connect 26 0 27 0;
+#X connect 27 0 25 0;
+#X connect 28 0 40 0;
+#X connect 29 0 30 0;
+#X connect 30 0 28 0;
+#X connect 31 0 41 0;
+#X connect 32 0 33 0;
+#X connect 33 0 31 0;
+#X coords 0 -1 1 1 280 80 1 30 230;

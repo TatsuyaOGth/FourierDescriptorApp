@@ -1,0 +1,54 @@
+#N canvas 696 27 431 518 12;
+#X obj 86 414 vline~;
+#X obj 116 126 vsl 15 70 0 500 0 0 empty empty A 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 132 126 vsl 15 70 0 800 0 0 empty empty D 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 148 126 vsl 15 70 0 1 0 0 empty empty S 5 -9 0 10 -262144 -1
+-1 0 1;
+#X obj 164 126 vsl 15 70 0 700 0 0 empty empty R 5 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 100 126 vsl 15 70 0 1 0 0 empty empty V 5 -9 0 10 -262144 -1
+-1 0 1;
+#X floatatom 88 274 5 0 0 0 - - -;
+#X floatatom 130 274 5 0 0 0 - - -;
+#X floatatom 174 274 5 0 0 0 - - -;
+#X floatatom 220 273 5 0 0 0 - - -;
+#X floatatom 266 274 5 0 0 0 - - -;
+#X msg 86 373 \$1 \$2 \, \$4 \$3 \$2;
+#X obj 214 371 pack 0 0;
+#X obj 86 335 pack 0 0 0 0;
+#X floatatom 23 24 5 0 0 0 - - -;
+#X obj 22 47 / 127;
+#X obj 22 76 sel 0;
+#X obj 86 444 outlet~;
+#X obj 23 -1 inlet;
+#X obj 96 56 unpack 0 0 0 0;
+#X obj 96 -2 inlet;
+#X obj 164 5 r myEGparam;
+#X connect 0 0 17 0;
+#X connect 1 0 7 0;
+#X connect 2 0 8 0;
+#X connect 3 0 9 0;
+#X connect 4 0 10 0;
+#X connect 5 0 6 0;
+#X connect 6 0 13 0;
+#X connect 7 0 13 1;
+#X connect 8 0 13 2;
+#X connect 9 0 13 3;
+#X connect 10 0 12 1;
+#X connect 11 0 0 0;
+#X connect 12 0 0 0;
+#X connect 13 0 11 0;
+#X connect 14 0 15 0;
+#X connect 15 0 16 0;
+#X connect 16 0 12 0;
+#X connect 16 1 5 0;
+#X connect 18 0 14 0;
+#X connect 19 0 1 0;
+#X connect 19 1 2 0;
+#X connect 19 2 3 0;
+#X connect 19 3 4 0;
+#X connect 20 0 19 0;
+#X connect 21 0 19 0;
+#X coords 0 -1 1 1 80 100 2 100 100;
