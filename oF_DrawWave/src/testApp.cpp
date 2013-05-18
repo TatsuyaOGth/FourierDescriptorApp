@@ -387,6 +387,30 @@ void testApp::draw()
                 mVecOut.endShape();
             }
         }
+        
+        //----------
+        // 音声入力で形状生成
+        //----------
+        if (bSoundDrawMode) {
+            ofPushStyle();
+            ofSetColor(255, 255, 255);
+            mVecOut.fill();
+            mVecOut.beginShape();
+            vector<ofPoint> tpts = getAudioInPoints();
+//            for(int i = 0; i < mLefts.size(); i++){
+//                float _x = sin(ofDegToRad(ofMap((float)i, 0, mLefts.size(), 0, 359)));
+//                float _y = cos(ofDegToRad(ofMap((float)i, 0, mLefts.size(), 0, 359)));
+//                _x *= (mLefts[i]*1000) + (mScaledVol * 300);
+//                _y *= (mLefts[i]*1000) + (mScaledVol * 300);
+//                mVecOut.curveVertex(mouseX+_x, mouseY+_y);
+//            }
+            for (int i=0; i < tpts.size(); i++) {
+                mVecOut.curveVertex(tpts[i].x, tpts[i].y);
+            }
+            mVecOut.endShape();
+            ofPopStyle();
+        }
+        
     }
     
     if (bDebugMode) {
@@ -441,6 +465,7 @@ void testApp::debugDraw()
     << "Figure 2        : " << mFigures2.size() << endl
     ;
     if (bCircleMode) str << "Circle Mode ON" << endl;
+    if (bSoundDrawMode) str << "Audio input Mode ON" << endl;
     ofSetColor(255);
     ofDrawBitmapString(str.str(), 10, 15);
     
@@ -490,23 +515,6 @@ void testApp::debugDraw()
     
     ofPopMatrix();
 	ofPopStyle();
-
-    //test
-//    ofPushStyle();
-//    int numPts = mLefts.size();
-//    int rescaleRes = 1;
-//    ofSetColor(255, 255, 255);
-//    mVecOut.fill();
-//    mVecOut.beginShape();
-//    int num
-//    for(int i = 0; i < numPts; i++){
-//        if(i == 0 || i == numPts -1){
-//            mVecOut.curveVertex(mPts[i].x, mPts[i].y);
-//        }
-//        if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
-//    }
-//    mVecOut.endShape();
-//    ofPopStyle();
     
 }
 
@@ -544,10 +552,12 @@ void testApp::keyPressed(int key){
             bDebugMode = !bDebugMode;
             break;
         case 's':
-            for (int i = 0; i < 10; i++) {
-                sendFigId(i);
-                sendSet();
-            }
+            bSoundDrawMode = !bSoundDrawMode;
+            break;
+        case 'S':
+            mPts.clear();
+            mPts = getAudioInPoints();
+            bProcessGetDraw = true;
             break;
         case 'a':
             break;
@@ -786,6 +796,22 @@ vector<wave> testApp::getShapeFrequency(const ofImage src, unsigned interval)
     return dst;
 }
 
+/**
+ 音声のサンプルから座標点に変換します
+ */
+vector<ofPoint> testApp::getAudioInPoints()
+{
+    vector<ofPoint> dst;
+    for(int i = 0; i < mLefts.size(); i++){
+        float _x = sin(ofDegToRad(ofMap((float)i, 0, mLefts.size(), 0, 359)));
+        float _y = cos(ofDegToRad(ofMap((float)i, 0, mLefts.size(), 0, 359)));
+        _x *= (mLefts[i]*1000) + (mScaledVol * 300);
+        _y *= (mLefts[i]*1000) + (mScaledVol * 300);
+        dst.push_back(ofPoint(mouseX+_x, mouseY+_y));
+    }
+    return dst;
+}
+
 
 /**
  ２値画像から輪郭追跡を実行し、各輪郭点を順番に格納した配列を返します.
@@ -1009,19 +1035,6 @@ void testApp::sendDelete(const int figID)
 void testApp::sendBits()
 {
     if (mEdgeBits.size()) {
-        
-//        if (mEdgeBits.size() > 255) {
-//            for (int i=0; i < 255; i++) {
-//                ofxOscMessage _m;
-//                _m.setAddress("/bit");
-//                int j = i % mEdgeBits.size();
-//                _m.addFloatArg(mEdgeBits[j].bit);
-//                _m.addIntArg(i);
-//                sender.sendMessage(_m);
-//            }
-//        } else {
-        
-
         double tBit = 0;
         for (int i=0; i < 255; i++) {
             ofxOscMessage _m;
@@ -1033,16 +1046,5 @@ void testApp::sendBits()
             
             sender.sendMessage(_m);
         }
-        
-//        }
-        
-//        m.setAddress("/bits");
-//        for (int i=0; i < 255; i++) {
-//            int j = i % mEdgeBits.size();
-//            m.addFloatArg(mEdgeBits[j].bit);
-//            m.addFloatArg(ofGetElapsedTimef());
-//        }
-//        sender.sendMessage(m);
-
     }
 }

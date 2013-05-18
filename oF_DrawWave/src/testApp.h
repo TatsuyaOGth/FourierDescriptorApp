@@ -41,11 +41,13 @@ private:
     
     void calcFourier();
     vector<wave> getShapeFrequency(const ofImage src, const unsigned interval);
+    vector<ofPoint> getAudioInPoints();
     void sendSet();
     void sendFigId(const int figId);
     void sendBits();
     void sendFigMode(const int mode);
     void sendDelete(const int figID);
+    
     
     ofxControlPanel gui;
     
@@ -62,6 +64,7 @@ private:
     bool bDrawing;
     bool bProcessGetDraw;
     bool bCircleMode;
+    bool bSoundDrawMode;
     
     
     vector<Figure> mFigures1; //!< figモード1

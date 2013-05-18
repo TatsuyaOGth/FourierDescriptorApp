@@ -9,14 +9,20 @@
 #include "Figure.h"
 
 
+Figure::Figure()
+{
+    mID = -1;
+    mMode = -1;
+    mAlph = 255;
+}
+
 /**
  更新
  */
 void Figure::update()
 {
-    //test
-    for (int i=0; i < mPts.size(); i++) {
-        mPts[i].x -= 1;
+    if (mAlph > 127) {
+        mAlph--;
     }
 }
 
@@ -26,7 +32,8 @@ void Figure::update()
 void Figure::draw()
 {
     ofPushStyle();
-
+    ofEnableAlphaBlending();
+    ofSetColor(255, 255, 255, mAlph);
     if( mPts.size() > 0 ) {
         int numPts = mPts.size();
         int rescaleRes = 1;
@@ -40,7 +47,7 @@ void Figure::draw()
         }
         mVecOut.endShape();
     }
-    
+    ofDisableAlphaBlending();
     ofPopStyle();
 }
 

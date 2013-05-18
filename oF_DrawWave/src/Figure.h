@@ -19,6 +19,8 @@
  */
 class Figure {
 public:
+    
+    Figure();
 
     void update();
     void draw();
@@ -40,6 +42,8 @@ private:
     ofxVectorGraphics mVecOut;
     vector<ofPoint> mPts;
     vector<ofPoint> mEdgePts;
+    
+    int mAlph;
         
 };
 
