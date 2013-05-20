@@ -45,8 +45,9 @@ private:
     void sendSet();
     void sendFigId(const int figId);
     void sendBits();
+    void sendPos(const ofPoint pos);
     void sendFigMode(const int mode);
-    void sendDelete(const int figID);
+    void sendDelete(const int mode, const int figID);
     
     
     ofxControlPanel gui;
@@ -58,8 +59,6 @@ private:
     vector<wave> mEdgeBits; //!< mPtsを波形変換したもの
     unsigned int mInterval;
     
-    ofRectangle mPtsRect;
-    ofRectangle mScaleRect;
     bool bDebugMode;
     bool bDrawing;
     bool bProcessGetDraw;

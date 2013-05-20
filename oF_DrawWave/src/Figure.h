@@ -33,6 +33,8 @@ public:
     void setEdgePts(const vector<ofPoint> edgePts);
     int getID(){return mID;};
     int getMode(){return mMode;};
+    ofPoint getPos(){return mPos;};
+    
     bool getAlive();
     
 private:
@@ -44,6 +46,7 @@ private:
     vector<ofPoint> mEdgePts;
     
     int mAlph;
+    ofPoint mPos;
         
 };
 

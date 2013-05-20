@@ -1,0 +1,32 @@
+#N canvas 0 22 602 460 10;
+#X obj 55 17 inlet;
+#X obj 54 44 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 55 290 vline~;
+#X text 502 20 signal;
+#X obj 98 132 hsl 128 15 0 1000 0 0 empty empty empty -2 -8 0 10 -262144
+-1 -1 1270 1;
+#X msg 56 255 1 \, 0 \$1;
+#X obj 55 222 int;
+#X floatatom 180 114 5 0 0 0 - - -;
+#X obj 59 426 outlet~;
+#X obj 58 346 *~;
+#X obj 157 53 loadbang;
+#X msg 157 76 100;
+#X text 91 19 bang in play;
+#X obj 462 20 inlet~;
+#X text 124 115;
+#X text 140 116;
+#X text 215 117 ms;
+#X connect 0 0 1 0;
+#X connect 1 0 6 0;
+#X connect 2 0 9 1;
+#X connect 4 0 7 0;
+#X connect 5 0 2 0;
+#X connect 6 0 5 0;
+#X connect 7 0 6 1;
+#X connect 9 0 8 0;
+#X connect 10 0 11 0;
+#X connect 11 0 4 0;
+#X connect 13 0 9 0;
+#X coords 0 -1 1 1 160 40 1 80 110;

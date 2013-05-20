@@ -6,7 +6,7 @@ bool isSide(int i, int x, int h);
 vector<ofPoint> getContourPoints(const ofPixels src);
 
 static const string         HOST = "localhost";
-static const unsigned int   PORT = 50000;
+static const unsigned int   PORT = 50001;
 static const unsigned int   MAX_FIGMODE1_ID = 20;
 static const unsigned int   MAX_FIGMODE2_ID = 3;
 
@@ -27,7 +27,6 @@ void testApp::setup()
     bDrawing = false;
     bProcessGetDraw = false;
     bCircleMode = false;
-    mPtsRect.set(-1, -1, -1, -1);
     mFigMode = 1;
     bIDMaxed = false;
     
@@ -112,6 +111,8 @@ void testApp::draw()
             float minY = ofGetHeight();
             float maxX = 0;
             float maxY = 0;
+            float sumX = 0;
+            float sumY = 0;
             for (int i=0; i < mPts.size(); i++) {
                 if (mPts[i].x < minX) minX = mPts[i].x;
                 if (mPts[i].y < minY) minY = mPts[i].y;
@@ -125,7 +126,6 @@ void testApp::draw()
                 goto _FAILD_GET_DRAWING;
             }
             scaleRect.set(minX, minY, maxX-minX, maxY-minY);
-            mPtsRect = scaleRect;
             
             //----------
             // 格子範囲を正規化
@@ -274,7 +274,14 @@ void testApp::draw()
                 case 1:mFigures1.push_back(tmpF); break;
                 case 2:mFigures2.push_back(tmpF); break;
             }
-            cout << tmpF.getID() << endl;
+            
+            //----------
+            // OSCで作成したFigureの情報を送る
+            //----------
+            sendFigMode(mFigMode);
+            sendFigId(tmpF.getID());
+            sendPos(tmpF.getPos());
+            sendBits();
             
         JUMP:
             
@@ -397,13 +404,6 @@ void testApp::draw()
             mVecOut.fill();
             mVecOut.beginShape();
             vector<ofPoint> tpts = getAudioInPoints();
-//            for(int i = 0; i < mLefts.size(); i++){
-//                float _x = sin(ofDegToRad(ofMap((float)i, 0, mLefts.size(), 0, 359)));
-//                float _y = cos(ofDegToRad(ofMap((float)i, 0, mLefts.size(), 0, 359)));
-//                _x *= (mLefts[i]*1000) + (mScaledVol * 300);
-//                _y *= (mLefts[i]*1000) + (mScaledVol * 300);
-//                mVecOut.curveVertex(mouseX+_x, mouseY+_y);
-//            }
             for (int i=0; i < tpts.size(); i++) {
                 mVecOut.curveVertex(tpts[i].x, tpts[i].y);
             }
@@ -535,12 +535,10 @@ void testApp::keyPressed(int key){
         case OF_KEY_BACKSPACE:
         case OF_KEY_DEL:
             if (mFigMode==1 && !mFigures1.empty()) {
-                sendFigMode(mFigMode);
-                sendDelete(mFigures1[0].getID());
+                sendDelete(1, mFigures1[0].getID());
                 mFigures1.erase(mFigures1.begin());
             } else if (mFigMode==2 && !mFigures2.empty()) {
-                sendFigMode(mFigMode);
-                sendDelete(mFigures2[0].getID());
+                sendDelete(2, mFigures2[0].getID());
                 mFigures2.erase(mFigures2.begin());
             }
             break;
@@ -707,8 +705,6 @@ void testApp::calcFourier()
             cout << "\n\n";
         }
     }
-    //send osc
-    sendBits();
 }
 
 /**
@@ -1016,16 +1012,31 @@ void testApp::sendFigMode(const int mode)
     sender.sendMessage(m);
 }
 
+/**
+ 座標を送信　※0-1に正規化して送信
+ @param pos 重心座標
+ */
+void testApp::sendPos(const ofPoint pos)
+{
+    ofxOscMessage m;
+    m.setAddress("/pos");
+    m.addFloatArg(pos.x/ofGetWidth());
+    m.addFloatArg(pos.y/ofGetHeight());
+    sender.sendMessage(m);
+}
+
 
 /**
  削除を送信
  @param figID ID
  */
-void testApp::sendDelete(const int figID)
+void testApp::sendDelete(const int mode, const int figID)
 {
     ofxOscMessage m;
     m.setAddress("/del");
+    m.addIntArg(mode);
     m.addIntArg(figID);
+    m.addStringArg("del");
     sender.sendMessage(m);
 }
 

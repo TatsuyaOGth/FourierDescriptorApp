@@ -8,6 +8,7 @@
 
 #include "Figure.h"
 
+ofPoint cacCentroid(const vector<ofPoint> pts);
 
 Figure::Figure()
 {
@@ -62,6 +63,9 @@ void Figure::debugDraw()
         ofSetColor(255, 0, 0);
         ofCircle(mEdgePts[i], 2);
     }
+    //重心を描画
+    ofSetColor(255, 255, 0);
+    ofCircle(mPos, 2);
     ofPopStyle();
 }
 
@@ -75,6 +79,7 @@ void Figure::setID(const int ID)
 
 /**
  モードをセット
+ @param mode モード
  */
 void Figure::setMode(const int mode)
 {
@@ -91,10 +96,12 @@ void Figure::setPts(const vector<ofPoint> pts)
 
 /**
  実際に計算に使用した輪郭点を取得
+ 同時に重心を計算
  */
 void Figure::setEdgePts(const vector<ofPoint> edgePts)
 {
     mEdgePts = edgePts;
+    mPos = cacCentroid(edgePts);
 }
 
 
@@ -107,6 +114,25 @@ bool Figure::getAlive()
         return false;
     } else {
         return true;
+    }
+}
+
+/**
+ 重心を計算
+ */
+ofPoint cacCentroid(const vector<ofPoint> pts)
+{
+    if (pts.size()) {
+        float sumX = 0;
+        float sumY = 0;
+        for (int i=0; i < pts.size(); i++) {
+            sumX += pts[i].x;
+            sumY += pts[i].y;
+        }
+        return ofPoint(sumX/pts.size(), sumY/pts.size());
+    } else {
+        cout << "[ERROR] faild get centroid " << endl;
+        return ofPoint(-1,-1);
     }
 }
 
