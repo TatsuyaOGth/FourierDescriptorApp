@@ -1,0 +1,18 @@
+#N canvas 361 172 679 404 10;
+#X obj 162 106 playwave;
+#X obj 171 212 pon;
+#X obj 301 48 inlet;
+#X obj 358 49 inlet;
+#X obj 53 35 inlet;
+#X obj 106 129 bng 50 250 50 0 empty empty empty 17 7 0 10 -1 -257985
+-1;
+#X obj 106 309 outlet~;
+#X obj 169 308 throw~ wav;
+#X connect 0 0 1 2;
+#X connect 1 0 6 0;
+#X connect 1 0 7 0;
+#X connect 2 0 0 2;
+#X connect 3 0 1 1;
+#X connect 4 0 5 0;
+#X connect 5 0 1 0;
+#X coords 0 -1 1 1 240 160 1 100 100;

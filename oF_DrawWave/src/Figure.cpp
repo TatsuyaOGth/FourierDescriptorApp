@@ -34,19 +34,38 @@ void Figure::draw()
 {
     ofPushStyle();
     ofEnableAlphaBlending();
-    ofSetColor(255, 255, 255, mAlph);
-    if( mPts.size() > 0 ) {
-        int numPts = mPts.size();
-        int rescaleRes = 1;
-        mVecOut.fill();
-        mVecOut.beginShape();
-        for(int i = 0; i < numPts; i++){
-            if(i == 0 || i == numPts -1){
-                mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+    
+    if (mMode == 1) {
+        ofSetColor(255, 255, 0, mAlph);
+        if( mPts.size() > 0 ) {
+            int numPts = mPts.size();
+            int rescaleRes = 1;
+            mVecOut.fill();
+            mVecOut.beginShape();
+            for(int i = 0; i < numPts; i++){
+                if(i == 0 || i == numPts -1){
+                    mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+                }
+                if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
             }
-            if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+            mVecOut.endShape();
         }
-        mVecOut.endShape();
+    } else if (mMode == 2) {
+        ofSetColor(0, 255, 255, mAlph);
+        if( mPts.size() > 0 ) {
+            int numPts = mPts.size();
+            int rescaleRes = 1;
+            mVecOut.fill();
+            mVecOut.beginShape();
+            for(int i = 0; i < numPts; i++){
+                if(i == 0 || i == numPts -1){
+                    mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+                }
+                if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+            }
+            mVecOut.endShape();
+        }
+
     }
     ofDisableAlphaBlending();
     ofPopStyle();

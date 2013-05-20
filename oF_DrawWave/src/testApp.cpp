@@ -7,8 +7,8 @@ vector<ofPoint> getContourPoints(const ofPixels src);
 
 static const string         HOST = "localhost";
 static const unsigned int   PORT = 50001;
-static const unsigned int   MAX_FIGMODE1_ID = 20;
-static const unsigned int   MAX_FIGMODE2_ID = 3;
+static const unsigned int   MAX_FIGMODE1_ID = 8;
+static const unsigned int   MAX_FIGMODE2_ID = 1;
 
 //--------------------------------------------------------------
 void testApp::setup()
@@ -466,6 +466,7 @@ void testApp::debugDraw()
     ;
     if (bCircleMode) str << "Circle Mode ON" << endl;
     if (bSoundDrawMode) str << "Audio input Mode ON" << endl;
+    if (bIDMaxed) str << "Figure ID is mexed, type delete key." << endl;
     ofSetColor(255);
     ofDrawBitmapString(str.str(), 10, 15);
     
@@ -535,9 +536,13 @@ void testApp::keyPressed(int key){
         case OF_KEY_BACKSPACE:
         case OF_KEY_DEL:
             if (mFigMode==1 && !mFigures1.empty()) {
+                sendFigMode(1);
+                sendFigId(mFigures1[0].getID());
                 sendDelete(1, mFigures1[0].getID());
                 mFigures1.erase(mFigures1.begin());
             } else if (mFigMode==2 && !mFigures2.empty()) {
+                sendFigMode(1);
+                sendFigId(mFigures1[0].getID());
                 sendDelete(2, mFigures2[0].getID());
                 mFigures2.erase(mFigures2.begin());
             }
@@ -697,13 +702,6 @@ void testApp::calcFourier()
     //周波数変換
     if (mGrabImage.isAllocated()) {
         mEdgeBits = getShapeFrequency(mGrabImage, mInterval);
-        
-        //print out
-        if (mEdgeBits.size()) {
-            cout << "size" << mEdgeBits.size() << endl;
-            for (int i=0; i < mEdgeBits.size(); i++) cout << mEdgeBits[i].dist << ", " << mEdgeBits[i].bit << endl;
-            cout << "\n\n";
-        }
     }
 }
 
@@ -1058,4 +1056,11 @@ void testApp::sendBits()
             sender.sendMessage(_m);
         }
     }
+}
+
+/**
+ 初期化命令を送信
+ */
+void testApp::sendInit()
+{
 }

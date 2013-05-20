@@ -48,6 +48,7 @@ private:
     void sendPos(const ofPoint pos);
     void sendFigMode(const int mode);
     void sendDelete(const int mode, const int figID);
+    void sendInit();
     
     
     ofxControlPanel gui;
