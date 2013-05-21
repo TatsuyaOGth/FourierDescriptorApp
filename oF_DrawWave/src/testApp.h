@@ -2,8 +2,6 @@
 
 #include "ofMain.h"
 #include "ofxVectorGraphics.h"
-#include "ofxOpenCv.h"
-#include "ofxControlPanel.h"
 #include "ofxOsc.h"
 #include "Figure.h"
 
@@ -47,12 +45,8 @@ private:
     void sendBits();
     void sendPos(const ofPoint pos);
     void sendFigMode(const int mode);
-    void sendDelete(const int mode, const int figID);
-    void sendInit();
-    
-    
-    ofxControlPanel gui;
-    
+    void sendDelete(const int mode, const int figID);    
+        
     ofxVectorGraphics mVecOut;
     vector<ofPoint> mPts; //!< 描画した線の点配列
     ofImage mGrabImage;

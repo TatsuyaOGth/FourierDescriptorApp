@@ -179,7 +179,6 @@ void testApp::draw()
             
             //スクリーンショット
             mGrabImage.grabScreen(0, 0, ofGetWidth(), ofGetHeight());
-//            mGrabImage.saveImage("test.tiff");
             mTmpWindow.draw(0, 0); //元の画面を描画
             
             bProcessGetDraw = false;
@@ -356,14 +355,14 @@ void testApp::draw()
         for (int i=0; i < mFigures1.size(); i++) {
             mFigures1[i].draw();
             if (bDebugMode) {
-                mFigures1[i].debugDraw();
+//                mFigures1[i].debugDraw();
             }
         }
         //fig2
         for (int i=0; i < mFigures2.size(); i++) {
             mFigures2[i].draw();
             if (bDebugMode) {
-                mFigures2[i].debugDraw();
+//                mFigures2[i].debugDraw();
             }
         }
 
@@ -743,17 +742,6 @@ vector<wave> testApp::getShapeFrequency(const ofImage src, unsigned interval)
     vector<ofPoint> pts = getContourPoints(px);
     if (pts.empty()) return dst;
     
-    /* cvContoursFinderを使った場合 */
-//    ofxCvGrayscaleImage gImg;
-//    ofxCvContourFinder cf;
-//    gImg.setFromPixels(px);
-//    cf.findContours(gImg, 20, ofGetWidth() * ofGetHeight(), 1, false);
-//    if (cf.blobs.empty()) {
-//        cout << "[ERROR] 輪郭が取得されませんでした" << endl;
-//        return dst;
-//    }
-//    vector<ofPoint> pts = cf.blobs[0].pts;
-    
     //----------
     // 指定した間隔毎のポイントから開始点との角度を取得
     //----------
@@ -1056,11 +1044,4 @@ void testApp::sendBits()
             sender.sendMessage(_m);
         }
     }
-}
-
-/**
- 初期化命令を送信
- */
-void testApp::sendInit()
-{
 }
