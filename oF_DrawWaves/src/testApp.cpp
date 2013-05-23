@@ -465,9 +465,16 @@ void testApp::debugDraw()
     ;
     if (bCircleMode) str << "Circle Mode ON" << endl;
     if (bSoundDrawMode) str << "Audio input Mode ON" << endl;
-    if (bIDMaxed) str << "Figure ID is mexed, type delete key." << endl;
+    if (mFigMode==1) str << "Destination Wave 1 [to Sound Waves]" << endl;
+    else if (mFigMode==2) str << "Destination Wave 2 [to Sequence Wave]" << endl;
     ofSetColor(255);
     ofDrawBitmapString(str.str(), 10, 15);
+    
+    if (bIDMaxed) {
+        ofSetColor(255, 127, 127);
+        ofDrawBitmapString("Figure ID is mexed, type DELETE key", mouseX+30, mouseY);
+    }
+
     
     ofDisableAlphaBlending();
     ofPopStyle();
