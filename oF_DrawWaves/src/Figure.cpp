@@ -1,20 +1,22 @@
 //
-//  Figure.cpp
-//  DrawWave
-//
-//  Created by Tatsuya Ogusu on 2013/05/06.
-//
+//  FourierDescriptorApp | Pure Data Japan 1st Session @ Shibuya 2.5D
+//  Created by Tatsuya Ogusu 2013/05/29
+//  http://ogsn.org @TatsuyaOGs
+//  license http://creativecommons.org/licenses/by/3.0/
 //
 
 #include "Figure.h"
 
-ofPoint cacCentroid(const vector<ofPoint> pts);
-
 Figure::Figure()
 {
-    mID = -1;
-    mMode = -1;
-    mAlph = 255;
+    mPosX = 0;
+    mPosY = 0;
+    mPosZ = 0;
+    mSpX = ofRandom(-1,1);
+    mSpY = ofRandom(-1,1);
+    mSpZ = ofRandom(-2,0);
+    mAlive = true;
+    mAlp = 255;
 }
 
 /**
@@ -22,9 +24,11 @@ Figure::Figure()
  */
 void Figure::update()
 {
-    if (mAlph > 127) {
-        mAlph--;
-    }
+    mPosX += mSpX;
+    mPosY += mSpY;
+    mPosZ += mSpZ;
+    if (mAlp > 0) mAlp--;
+    else mAlive = false;
 }
 
 /**
@@ -32,43 +36,28 @@ void Figure::update()
  */
 void Figure::draw()
 {
+    ofPushMatrix();
     ofPushStyle();
-    ofEnableAlphaBlending();
-    
-    if (mMode == 1) {
-        ofSetColor(255, 255, 0, mAlph);
-        if( mPts.size() > 0 ) {
-            int numPts = mPts.size();
-            int rescaleRes = 1;
-            mVecOut.fill();
-            mVecOut.beginShape();
-            for(int i = 0; i < numPts; i++){
-                if(i == 0 || i == numPts -1){
-                    mVecOut.curveVertex(mPts[i].x, mPts[i].y);
-                }
-                if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
-            }
-            mVecOut.endShape();
-        }
-    } else if (mMode == 2) {
-        ofSetColor(0, 255, 255, mAlph);
-        if( mPts.size() > 0 ) {
-            int numPts = mPts.size();
-            int rescaleRes = 1;
-            mVecOut.fill();
-            mVecOut.beginShape();
-            for(int i = 0; i < numPts; i++){
-                if(i == 0 || i == numPts -1){
-                    mVecOut.curveVertex(mPts[i].x, mPts[i].y);
-                }
-                if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
-            }
-            mVecOut.endShape();
-        }
 
+    ofTranslate(mPosX, mPosY, mPosZ);
+    ofSetColor(255, 255, 255, mAlp);
+
+    if( mPts.size() > 0 ) {
+        int numPts = mPts.size();
+        int rescaleRes = 1;
+        mVecOut.fill();
+        mVecOut.beginShape();
+        for(int i = 0; i < numPts; i++){
+            if(i == 0 || i == numPts -1){
+                mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+            }
+            if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+        }
+        mVecOut.endShape();
     }
-    ofDisableAlphaBlending();
+    
     ofPopStyle();
+    ofPopMatrix();
 }
 
 /**
@@ -76,16 +65,16 @@ void Figure::draw()
  */
 void Figure::debugDraw()
 {
+    ofPushMatrix();
     ofPushStyle();
+    ofTranslate(mPosX, mPosY, mPosZ);
     for (int i=0; i < mEdgePts.size(); i++) {
         ofFill();
         ofSetColor(255, 0, 0);
         ofCircle(mEdgePts[i], 2);
     }
-    //重心を描画
-    ofSetColor(255, 255, 0);
-    ofCircle(mPos, 2);
     ofPopStyle();
+    ofPopMatrix();
 }
 
 /**
@@ -94,15 +83,6 @@ void Figure::debugDraw()
 void Figure::setID(const int ID)
 {
     mID = ID;
-}
-
-/**
- モードをセット
- @param mode モード
- */
-void Figure::setMode(const int mode)
-{
-    mMode = mode;
 }
 
 /**
@@ -115,45 +95,16 @@ void Figure::setPts(const vector<ofPoint> pts)
 
 /**
  実際に計算に使用した輪郭点を取得
- 同時に重心を計算
  */
 void Figure::setEdgePts(const vector<ofPoint> edgePts)
 {
     mEdgePts = edgePts;
-    mPos = cacCentroid(edgePts);
 }
 
-
 /**
- 輪郭点配列が０以上あるか
+ 生きているかどうか
  */
 bool Figure::getAlive()
 {
-    if (mPts.size() > 0) {
-        return false;
-    } else {
-        return true;
-    }
+    return mAlive;
 }
-
-/**
- 重心を計算
- */
-ofPoint cacCentroid(const vector<ofPoint> pts)
-{
-    if (pts.size()) {
-        float sumX = 0;
-        float sumY = 0;
-        for (int i=0; i < pts.size(); i++) {
-            sumX += pts[i].x;
-            sumY += pts[i].y;
-        }
-        return ofPoint(sumX/pts.size(), sumY/pts.size());
-    } else {
-        cout << "[ERROR] faild get centroid " << endl;
-        return ofPoint(-1,-1);
-    }
-}
-
-
-

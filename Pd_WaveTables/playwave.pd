@@ -1,4 +1,4 @@
-#N canvas 254 65 874 487 10;
+#N canvas 304 217 874 487 10;
 #N canvas 0 22 450 278 (subpatch) 0;
 #X array \$0-wav 259 float 1;
 #A 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.325991 0.325991 0.325991 0.325991
@@ -73,13 +73,7 @@
 #X obj 527 158 uzi 259;
 #X obj 433 21 inlet;
 #X text 471 19 vol;
-#X obj 700 136 unpack;
-#X floatatom 701 164 5 0 0 0 - - -;
-#X floatatom 737 163 5 0 0 0 - - -;
-#X floatatom 738 224 5 0 0 0 - - -;
-#X obj 739 253 s \$0-note;
 #X obj 273 66 r \$0-note;
-#X obj 737 195 expr ((-$f1+1)*64)+32;
 #X text 567 19 set wave table;
 #X obj 526 73 route set pos;
 #X connect 1 0 9 0;
@@ -102,7 +96,7 @@
 #X connect 20 1 15 1;
 #X connect 24 0 17 0;
 #X connect 24 1 12 0;
-#X connect 26 0 44 0;
+#X connect 26 0 38 0;
 #X connect 28 0 33 0;
 #X connect 30 0 27 0;
 #X connect 31 0 27 0;
@@ -111,13 +105,7 @@
 #X connect 33 0 30 0;
 #X connect 33 2 32 0;
 #X connect 34 0 6 0;
-#X connect 36 0 37 0;
-#X connect 36 1 38 0;
-#X connect 38 0 42 0;
-#X connect 39 0 40 0;
-#X connect 41 0 12 0;
-#X connect 42 0 39 0;
-#X connect 44 0 28 0;
-#X connect 44 1 36 0;
-#X connect 44 2 31 0;
+#X connect 36 0 12 0;
+#X connect 38 0 28 0;
+#X connect 38 2 31 0;
 #X coords 0 -1 1 1 170 100 1 300 100;

@@ -1,3 +1,10 @@
+//
+//  FourierDescriptorApp | Pure Data Japan 1st Session @ Shibuya 2.5D
+//  Created by Tatsuya Ogusu 2013/05/29
+//  http://ogsn.org @TatsuyaOGs
+//  license http://creativecommons.org/licenses/by/3.0/
+//
+
 #pragma once
 
 #include "ofMain.h"
@@ -39,13 +46,9 @@ private:
     
     void calcFourier();
     vector<wave> getShapeFrequency(const ofImage src, const unsigned interval);
-    vector<ofPoint> getAudioInPoints();
     void sendSet();
     void sendFigId(const int figId);
     void sendBits();
-    void sendPos(const ofPoint pos);
-    void sendFigMode(const int mode);
-    void sendDelete(const int mode, const int figID);    
         
     ofxVectorGraphics mVecOut;
     vector<ofPoint> mPts; //!< 描画した線の点配列
@@ -54,18 +57,14 @@ private:
     vector<wave> mEdgeBits; //!< mPtsを波形変換したもの
     unsigned int mInterval;
     
+    ofRectangle mPtsRect;
+    ofRectangle mScaleRect;
     bool bDebugMode;
     bool bDrawing;
     bool bProcessGetDraw;
     bool bCircleMode;
-    bool bSoundDrawMode;
     
-    
-    vector<Figure> mFigures1; //!< figモード1
-    vector<Figure> mFigures2; //!< figモード2
-    vector<vector<int> > mFigIDs; //!< (1)パターン (2)ID
-    int mFigMode;
-    bool bIDMaxed;
+    vector<Figure> mFigures;
     
     //osc
     ofxOscSender sender;

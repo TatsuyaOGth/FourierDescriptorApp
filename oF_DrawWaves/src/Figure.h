@@ -1,9 +1,8 @@
 //
-//  Figure.h
-//  DrawWave
-//
-//  Created by Tatsuya Ogusu on 2013/05/06.
-//
+//  FourierDescriptorApp | Pure Data Japan 1st Session @ Shibuya 2.5D
+//  Created by Tatsuya Ogusu 2013/05/29
+//  http://ogsn.org @TatsuyaOGs
+//  license http://creativecommons.org/licenses/by/3.0/
 //
 
 #ifndef __DrawWave__Figure__
@@ -28,25 +27,23 @@ public:
     void sendPlay();
     
     void setID(const int ID);
-    void setMode(const int mode);
     void setPts(const vector<ofPoint> pts);
     void setEdgePts(const vector<ofPoint> edgePts);
     int getID(){return mID;};
-    int getMode(){return mMode;};
-    ofPoint getPos(){return mPos;};
-    
     bool getAlive();
     
 private:
     
     int mID;
-    int mMode;
     ofxVectorGraphics mVecOut;
     vector<ofPoint> mPts;
     vector<ofPoint> mEdgePts;
+    bool mAlive;
+    int mAlp;
     
-    int mAlph;
-    ofPoint mPos;
+    //update
+    float mPosX, mPosY, mPosZ;
+    float mSpX, mSpY, mSpZ;
         
 };
 
