@@ -1,7 +1,7 @@
 # hidden/temp files
 .DS_Store
 *.swp
-*~.nib
+*.nib
  
 # Build dir
 build/
@@ -21,3 +21,6 @@ Thumbs.db
 *.mode2v3
 
 *.app
+
+obj/
+bin/
