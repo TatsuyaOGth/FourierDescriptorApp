@@ -11,6 +11,10 @@
 #include "ofMain.h"
 #include "ofxVectorGraphics.h"
 
+enum FigureMode{
+    STATIC_MODE=0,
+    AROUND_MODE
+};
 
 /**
  形態クラス
@@ -29,6 +33,7 @@ public:
     void setID(const int ID);
     void setPts(const vector<ofPoint> pts);
     void setEdgePts(const vector<ofPoint> edgePts);
+    void setMode(const FigureMode mode);
     int getID(){return mID;};
     bool getAlive();
     
@@ -44,6 +49,12 @@ private:
     //update
     float mPosX, mPosY, mPosZ;
     float mSpX, mSpY, mSpZ;
+    
+    FigureMode mMode;
+    
+    ofPoint mCentPos;
+    int mCurrentAroundNum;
+    
         
 };
 

@@ -17,6 +17,9 @@ Figure::Figure()
     mSpZ = ofRandom(-2,0);
     mAlive = true;
     mAlp = 255;
+    
+    mMode = AROUND_MODE;
+    mCurrentAroundNum = 0;
 }
 
 /**
@@ -29,6 +32,11 @@ void Figure::update()
     mPosZ += mSpZ;
     if (mAlp > 0) mAlp--;
     else mAlive = false;
+    
+    // Around Mode
+    if (mMode == AROUND_MODE) {
+        mCurrentAroundNum = (mCurrentAroundNum + 1) % mEdgePts.size();
+    }
 }
 
 /**
@@ -42,7 +50,7 @@ void Figure::draw()
     ofTranslate(mPosX, mPosY, mPosZ);
     ofSetColor(255, 255, 255, mAlp);
 
-    if( mPts.size() > 0 ) {
+    if(mPts.size() > 0) {
         int numPts = mPts.size();
         int rescaleRes = 1;
         mVecOut.fill();
@@ -55,8 +63,25 @@ void Figure::draw()
         }
         mVecOut.endShape();
     }
-    
     ofPopStyle();
+
+    // Around Mode
+    ofPushStyle();
+    if (mMode == AROUND_MODE) {
+        //重心を計算
+        float sumX = 0;
+        float sumY = 0;
+        for (int i = 0; i < mEdgePts.size(); i++) {
+            sumX += mEdgePts[i].x;
+            sumY += mEdgePts[i].y;
+        }
+        mCentPos.set(sumX/mEdgePts.size(), sumY/mEdgePts.size());
+        ofSetColor(255, 255, 0);
+        ofCircle(mCentPos, 5);
+    }
+    ofPopStyle();
+
+    
     ofPopMatrix();
 }
 
@@ -107,4 +132,23 @@ void Figure::setEdgePts(const vector<ofPoint> edgePts)
 bool Figure::getAlive()
 {
     return mAlive;
+}
+
+/**
+ モードをセット
+ */
+void Figure::setMode(const FigureMode mode)
+{
+    mMode = mode;
+    
+    if (mMode == AROUND_MODE) {
+        //重心を計算
+        float sumX = 0;
+        float sumY = 0;
+        for (int i = 0; i < mEdgePts.size(); i++) {
+            sumX += mEdgePts[i].x;
+            sumY += mEdgePts[i].y;
+        }
+        mCentPos.set(sumX/mEdgePts.size(), sumY/mEdgePts.size());
+    }
 }
