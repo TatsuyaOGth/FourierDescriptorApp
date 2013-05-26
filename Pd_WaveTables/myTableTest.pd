@@ -1,0 +1,12 @@
+#N canvas 616 136 524 393 10;
+#X obj 115 20 hsl 128 15 0 127 0 0 empty empty empty -2 -8 0 10 -262144
+-1 -1 0 1;
+#X obj 115 352 hsl 128 15 0 127 0 0 empty empty empty -2 -8 0 10 -262144
+-1 -1 0 1;
+#X text 93 18 0;
+#X text 248 17 127;
+#X text 93 352 0;
+#X text 248 352 127;
+#X obj 111 63 myTable127;
+#X connect 0 0 6 0;
+#X connect 6 0 1 0;
