@@ -1,6 +1,6 @@
 //
 //  FourierDescriptorApp | Pure Data Japan 1st Session @ Shibuya 2.5D
-//  Created by Tatsuya Ogusu 2013/05/29
+//  Created by Tatsuya Ogusu 2013/05/29~
 //  http://ogsn.org @TatsuyaOGs
 //  license http://creativecommons.org/licenses/by/3.0/
 //
@@ -37,6 +37,10 @@ void testApp::setup()
     
     //osc
     sender.setup(HOST, PORT);
+    mFMode = STATIC;
+    
+    //予めモード数の分要素数を確保
+    mFigures.resize(3);
     
     //----------
     //Sound stream
@@ -63,13 +67,18 @@ void testApp::update()
     //----------
     //死んでた場合は配列から削除
     for (int i=0; i < mFigures.size(); i++) {
-        if (!mFigures[i].getAlive()) {
-            mFigures.erase(mFigures.begin()+i);
-            continue;
+        for (int j=0; j < mFigures[i].size(); j++) {
+            if (!mFigures[i][j].getAlive()) {
+                mFigures[i].erase(mFigures[i].begin()+j);
+            }
         }
     }
-    for (int i=0; i < mFigures.size(); i++)
-        mFigures[i].update();
+    //図形クラスを更新
+    for (int i=0; i < mFigures.size(); i++) {
+        for (int j=0; j < mFigures[i].size(); j++) {
+            mFigures[i][j].update();
+        }
+    }
     
     //----------
     // Sound
@@ -190,8 +199,8 @@ void testApp::draw()
             if (bCircleMode) {
             
                 vector<ofPoint> edgePts;
-                for (int i=0; i < mEdgeBits.size(); i++) {
-                    edgePts.push_back(mEdgeBits[i].contPts);
+                for (int i=0; i < mResizedPts.size(); i++) {
+                    edgePts.push_back(mResizedPts[i]);
                 }
                 tmpF.setPts(edgePts);
                 tmpF.setEdgePts(edgePts);
@@ -202,19 +211,35 @@ void testApp::draw()
                 vector<ofPoint> edgePts;
                 for (int i=0; i < mEdgeBits.size(); i++) {
                     ofPoint tmpPoint;
-                    tmpPoint.set(ofMap(mEdgeBits[i].contPts.x, scaleRect.x, scaleRect.width, minX, maxX),
-                                 ofMap(mEdgeBits[i].contPts.y, scaleRect.y, scaleRect.height, minY, maxY));
+                    tmpPoint.set(ofMap(mResizedPts[i].x, scaleRect.x, scaleRect.width, minX, maxX),
+                                 ofMap(mResizedPts[i].y, scaleRect.y, scaleRect.height, minY, maxY));
                     edgePts.push_back(tmpPoint);
                 }
                 tmpF.setEdgePts(edgePts);
                 tmpF.setPts(mPts);
 
             }
-            mFigures.push_back(tmpF);
-            mPts.clear();
+            //モードをセットしてモードごとの配列に格納
+            //MEMO:現状、図形モードは配列の要素数とインスタンス毎のモード設定の２つで管理しているので、どっちかにしたい
+            tmpF.setMode(mFMode);
+            switch (mFMode) {
+                case STATIC: mFigures[0].push_back(tmpF); break;
+                case FLORTING: mFigures[1].push_back(tmpF); break;
+                case AROUND: mFigures[2].push_back(tmpF); break;
+            }
             
-            //tmp
-            mScaleRect = scaleRect;
+            //----------
+            // OSCでもろもろ送信
+            // 1.モードID 2.図形ID 3.全ビット
+            //----------
+            sendModeId((int)mFMode);
+            switch (mFMode) {
+                case STATIC: sendFigId(mFigures[0].size()-1); break;
+                case FLORTING: sendFigId(mFigures[1].size()-1); break;
+                case AROUND:sendFigId(mFigures[2].size()-1); break;
+            }
+            
+            mPts.clear();
         }
     
     _FAILD_GET_DRAWING:
@@ -281,9 +306,11 @@ void testApp::draw()
         // 形態を描画
         //----------
         for (int i=0; i < mFigures.size(); i++) {
-            mFigures[i].draw();
-            if (bDebugMode) {
-                mFigures[i].debugDraw();
+            for (int j=0; j < mFigures[i].size(); j++) {
+                mFigures[i][j].draw();
+                if (bDebugMode) {
+                    mFigures[i][j].debugDraw();
+                }
             }
         }
         
@@ -311,11 +338,18 @@ void testApp::draw()
                     if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
                 }
                 mVecOut.endShape();
+                
+                //もし開始点に近い場合はマークを表示
+                if (ofDist(mPts[0].x, mPts[0].y, mouseX, mouseY) < 20 && mPts.size() > 10) {
+                    ofPushStyle();
+                    ofSetColor(255, 0, 0);
+                    ofNoFill();
+                    ofSetLineWidth(2);
+                    ofCircle(mPts[0], 20);
+                    ofPopStyle();
+                }
             }
         }
-        
-
-        
     }
     
     if (bDebugMode) {
@@ -328,12 +362,10 @@ void testApp::draw()
  */
 void testApp::debugDraw()
 {
-    
-    ofPushStyle();
-    ofEnableAlphaBlending();
-    stringstream str;
-    
     if (!bDrawing) {
+        ofPushStyle();
+        ofEnableAlphaBlending();
+        stringstream str;
         
         ofSetLineWidth(1);
         ofSetColor(0, 255, 0, 255);
@@ -346,11 +378,11 @@ void testApp::debugDraw()
         ofSetColor(127, 127, 255);
         ofSetLineWidth(1);
         ofPushMatrix();
-        ofTranslate(400, 10);
+        ofTranslate(ofGetWidth()-266-110-210, 10);
         ofPoint tPos = ofPoint(0, 100/2);
         for (int i=0; i < mEdgeBits.size(); i++){
-            float j = ofMap(mEdgeBits[i].dist, 0, mEdgeBits[mEdgeBits.size()-1].dist, 0, 200);
-            ofPoint pos = ofPoint(j, mEdgeBits[i].bit * 50 + (100/2));
+            float j = ofMap(i, 0, mEdgeBits.size()-1, 0, 200);
+            ofPoint pos = ofPoint(j, mEdgeBits[i] * 50 + (100/2));
             ofLine(tPos, pos);
             tPos.set(pos);
             if (i == mEdgeBits.size()-1) {
@@ -361,64 +393,61 @@ void testApp::debugDraw()
         ofRect(0, 0, 200, 100);
         ofPopMatrix();
         
+        str << "display width   : " << ofGetWidth() << endl
+        << "display height  : " << ofGetHeight() << endl
+        << "Points Interval : " << mInterval << endl
+        ;
+        if (bCircleMode) str << "Circle Mode ON" << endl;
+        ofSetColor(255);
+        ofDrawBitmapString(str.str(), 10, 15);
         
+        ofDisableAlphaBlending();
+        ofPopStyle();
+        
+        //---------
+        // 入力音の波形を描画
+        //----------
+        //draw wave
+        ofPushStyle();
+        ofNoFill();
+        ofPushMatrix();
+        ofTranslate(ofGetWidth()-266, 10, 0);
+        
+        ofSetColor(225);
+        ofDrawBitmapString("Audio Input", 4, 18);
+        
+        ofSetLineWidth(1);
+        ofRect(0, 0, 256, 100);
+        
+        ofSetColor(0, 255, 0);
+        ofSetLineWidth(2);
+        
+        ofBeginShape();
+        for (int i = 0; i < mLefts.size(); i++){
+            ofVertex(i, 50 -mLefts[i]*180.0f);
+        }
+        ofEndShape(false);
+        
+        ofPopMatrix();
+        ofPopStyle();
+        ofNoFill();
+        
+        // draw the average volume:
+        ofPushStyle();
+        ofPushMatrix();
+        ofTranslate(ofGetWidth()-266-110, 10, 0);
+        
+        ofSetColor(225);
+        ofDrawBitmapString("Peak: " + ofToString(mScaledVol * 100.0, 0), 4, 18);
+        ofRect(0, 0, 100, 100);
+        
+        ofSetColor(245, 58, 135);
+        ofFill();
+        ofCircle(50, 50, mScaledVol * 100.0f);
+        
+        ofPopMatrix();
+        ofPopStyle();
     }
-    str << "display width   : " << ofGetWidth() << endl
-    << "display height  : " << ofGetHeight() << endl
-    << "Points Interval : " << mInterval << endl
-    ;
-    if (bCircleMode) str << "Circle Mode ON" << endl;
-    ofSetColor(255);
-    ofDrawBitmapString(str.str(), 10, 15);
-    
-    ofDisableAlphaBlending();
-    ofPopStyle();
-    
-    //---------
-    // 入力音の波形を描画
-    //----------
-    //draw wave
-	ofPushStyle();
-    ofNoFill();
-    ofPushMatrix();
-    ofTranslate(ofGetWidth()-266, 10, 0);
-    
-    ofSetColor(225);
-    ofDrawBitmapString("Audio Input", 4, 18);
-    
-    ofSetLineWidth(1);
-    ofRect(0, 0, 256, 100);
-    
-    ofSetColor(0, 255, 0);
-    ofSetLineWidth(2);
-    
-    ofBeginShape();
-    for (int i = 0; i < mLefts.size(); i++){
-        ofVertex(i, 50 -mLefts[i]*180.0f);
-    }
-    ofEndShape(false);
-    
-    ofPopMatrix();
-	ofPopStyle();
-    ofNoFill();
-
-    // draw the average volume:
-	ofPushStyle();
-    ofPushMatrix();
-    ofTranslate(ofGetWidth()-266-110, 10, 0);
-    
-    ofSetColor(225);
-    ofDrawBitmapString("Peak: " + ofToString(mScaledVol * 100.0, 0), 4, 18);
-    ofRect(0, 0, 100, 100);
-    
-    ofSetColor(245, 58, 135);
-    ofFill();
-    ofCircle(50, 50, mScaledVol * 100.0f);
-    
-    ofPopMatrix();
-	ofPopStyle();
-
-    
 }
 
 //--------------------------------------------------------------
@@ -444,6 +473,36 @@ void testApp::keyPressed(int key){
         case 'c':
             bCircleMode = !bCircleMode;
             break;
+            
+        case OF_KEY_BACKSPACE:
+        case OF_KEY_DEL:
+            switch (mFMode) {
+                case STATIC:
+                    if (mFigures[0].size()) {
+                        sendSet(mFigures[0].back().getModeID(), mFigures[0].back().getID());
+                        mFigures[0].pop_back();
+                    }
+                    break;
+                case FLORTING:
+                    if (mFigures[1].size()) {
+                        sendSet(mFigures[1].back().getModeID(), mFigures[1].back().getID());
+                        mFigures[1].pop_back();
+                    }
+                    break;
+                case AROUND:
+                    if (mFigures[2].size()) {
+                        sendSet(mFigures[2].back().getModeID(), mFigures[2].back().getID());
+                        mFigures[2].pop_back();
+                    }
+                    break;
+            }
+            break;
+        
+        // set mode
+        case '1':mFMode = STATIC;break;
+        case '2':mFMode = FLORTING;break;
+        case '3':mFMode = AROUND;break;
+
 
     }
 }
@@ -466,7 +525,7 @@ void testApp::mouseDragged(int x, int y, int button){
 	int last = mPts.size()-1;
 	mPts[last].x = x;
 	mPts[last].y = y;
-    bDrawing = true;
+    
 }
 
 //--------------------------------------------------------------
@@ -489,7 +548,13 @@ void testApp::mousePressed(int x, int y, int button){
 //--------------------------------------------------------------
 void testApp::mouseReleased(int x, int y, int button){
     bDrawing = false;
-    bProcessGetDraw = true;
+    
+    //もし開始点と遠ければ図形を描かない
+    if (ofDist(mPts[0].x, mPts[0].y, mouseX, mouseY) < 20 || bCircleMode) {
+        bProcessGetDraw = true;
+    } else {
+        mPts.clear();
+    }
 }
 
 //--------------------------------------------------------------
@@ -514,8 +579,8 @@ void testApp::audioIn(float * input, int bufferSize, int nChannels){
     int numCounted = 0;
     
     for (int i = 0; i < bufferSize; i++){
-		mLefts[i]		= input[i*2]*0.5;
-		mRights[i]	= input[i*2+1]*0.5;
+		mLefts[i]  = input[i*2]*0.5;
+		mRights[i] = input[i*2+1]*0.5;
         
 		curVol += mLefts[i] * mLefts[i];
 		curVol += mRights[i] * mRights[i];
@@ -539,11 +604,60 @@ void testApp::audioIn(float * input, int bufferSize, int nChannels){
 void testApp::calcFourier()
 {
     //既に計算した輪郭座標配列は削除
-    if (mEdgeBits.size()) mEdgeBits.clear();
+    mEdgeBits.clear();
+    mResizedPts.clear();
     
     //周波数変換
     if (mGrabImage.isAllocated()) {
-        mEdgeBits = getShapeFrequency(mGrabImage, mInterval);
+        ofPixels px;
+        ofPoint tPos;
+        
+        px.allocate(mGrabImage.width, mGrabImage.height, 1);
+        
+        //----------
+        // 入力画像から２値画像を生成
+        //----------
+        mGrabImage.setImageType(OF_IMAGE_GRAYSCALE);
+        px.set(0);
+        for (int i=0; i < (mGrabImage.width * mGrabImage.height); i++) {
+            if (mGrabImage.getPixels()[i] > 0) {
+                px.getPixels()[i] = 255;
+            } else {
+                px.getPixels()[i] = 0;
+            }
+        }
+        
+        //----------
+        // ２値画像を輪郭追跡メソッドに引き渡して描く輪郭点を取得
+        //----------
+        vector<ofPoint> pts = getContourPoints(px);
+        if (pts.empty()) return;
+        
+        //----------
+        // 指定した間隔毎のポイントから開始点との角度を取得
+        //----------
+        //開始点の0を追加
+        mEdgeBits.push_back(0.0f);
+        tPos.set(pts[0]);
+        
+        //一周分指定した間隔で前角度を計算
+        for (int i=0; i < pts.size(); i++) {
+            double dstWave;
+            //開始点との（輪郭線上の）距離を計算
+            //もし間隔が一定以上出ない場合はその点を除外
+            double tDist = ofDist(tPos.x, tPos.y, pts[i].x, pts[i].y);
+            if (tDist < mInterval) continue;
+            //角度を計算
+            double rnd = atan2((double)(pts[i].y - tPos.y),(double)(pts[i].x - tPos.x));
+            dstWave = sin(rnd);
+            //波形ビット配列に代入
+            mEdgeBits.push_back(dstWave);
+            //値を保持
+            tPos = pts[i];
+            
+            //描画線座標配列からインターバルをとった座標配列にセット
+            mResizedPts.push_back(pts[i]);
+        }
         
         //debug print
 //        if (mEdgeBits.size()) {
@@ -552,84 +666,7 @@ void testApp::calcFourier()
 //            cout << "\n\n";
 //        }
     }
-    //send osc
-    sendBits();
 }
-
-/**
- 指定した間隔の輪郭点を基にフーリエ記述子を計算し波形点配列を返します.
- @param src 入力画像
- @param interval 間隔
- @return 波形構造体の配列
- */
-vector<wave> testApp::getShapeFrequency(const ofImage src, unsigned interval)
-{
-    ofImage tImg = src;
-    vector<wave> dst;
-    ofPixels px;
-    ofPoint tPos;
-    px.allocate(tImg.width, tImg.height, 1);
-    
-    if (interval == 0) {
-        cout << "[ERROR] interval is zero" << endl;
-        return dst;
-    }
-    
-    //----------
-    // 入力画像から２値画像を生成
-    //----------
-    tImg.setImageType(OF_IMAGE_GRAYSCALE);
-    px.set(0);
-    for (int i=0; i < (tImg.width * tImg.height); i++) {
-        if (tImg.getPixels()[i] > 0) {
-            px.getPixels()[i] = 255;
-        } else {
-            px.getPixels()[i] = 0;
-        }
-    }
-    
-    //----------
-    // ２値画像を輪郭追跡メソッドに引き渡して描く輪郭点を取得
-    //----------
-    vector<ofPoint> pts = getContourPoints(px);
-    if (pts.empty()) return dst;
-    
-    //----------
-    // 指定した間隔毎のポイントから開始点との角度を取得
-    //----------
-    double dist = 0.0f;
-    //開始点の0を追加
-    wave first;
-    first.bit = 0.0;
-    first.dist = 0.0;
-    first.contPts.set(pts[0]);
-    dst.push_back(first);
-    tPos.set(pts[0]);
-
-    //一周分指定した間隔で前角度を計算
-    for (int i=0; i < pts.size(); i++) {
-        wave dstWave;
-        //開始点との（輪郭線上の）距離を計算
-        double tDist = ofDist(tPos.x, tPos.y, pts[i].x, pts[i].y);
-        //もし間隔が一定以上出ない場合はその点を除外
-        if (tDist < interval) continue;
-        dist += tDist;
-        dstWave.dist = dist;
-        //角度を計算
-        double rnd = atan2((double)(pts[i].y - tPos.y),(double)(pts[i].x - tPos.x));
-        dstWave.bit = sin(rnd);
-        //輪郭座標を取得
-        dstWave.contPts.set(pts[i]);
-        //出力配列に代入
-        dst.push_back(dstWave);
-        //値を保持
-        tPos = pts[i];
-        
-    }
-    
-    return dst;
-}
-
 
 /**
  ２値画像から輪郭追跡を実行し、各輪郭点を順番に格納した配列を返します.
@@ -800,6 +837,18 @@ bool isSide(int i, int w, int h)
 }
 
 /**
+ モードIDを送信
+ @param modeId モードID
+ */
+void testApp::sendModeId(const int modeId)
+{
+    ofxOscMessage m;
+    m.setAddress("/mode");
+    m.addIntArg(modeId);
+    sender.sendMessage(m);
+}
+
+/**
  IDを送信
  @param figID ID
  */
@@ -813,33 +862,40 @@ void testApp::sendFigId(const int figID)
 
 /**
  初期化命令を送信
+ @param modeId モードID
+ @param figId 図形ID
  */
-void testApp::sendSet()
+void testApp::sendSet(const int modeId, const int figId)
 {
     ofxOscMessage m;
     m.setAddress("/set");
+    m.addIntArg(modeId);
+    m.addIntArg(figId);
     m.addStringArg("set");
     sender.sendMessage(m);
 }
 
 /**
- ビットを送信
+ 全ビットを送信
+ @param modeId モードID
+ @param figId 図形ID
  */
-void testApp::sendBits()
+void testApp::sendBits(const int modeId, const int figId)
 {
     if (mEdgeBits.size()) {
-
+        ofxOscMessage m;
+        m.setAddress("/bits");
+        m.addIntArg(modeId);
+        m.addIntArg(figId);
+        sender.sendMessage(m);
+        
         double tBit = 0;
         for (int i=0; i < 255; i++) {
-            ofxOscMessage _m;
-            _m.setAddress("/bit");
-   
+            m.clear();
             int j = (int)(ofMap(i, 0, 255, 0, mEdgeBits.size()));
-            _m.addFloatArg(mEdgeBits[j].bit);
-            _m.addIntArg(i);
-            
-            sender.sendMessage(_m);
+            m.addFloatArg((float)mEdgeBits[j]);
+            m.addIntArg(i);
+            sender.sendMessage(m);
         }
-
     }
 }

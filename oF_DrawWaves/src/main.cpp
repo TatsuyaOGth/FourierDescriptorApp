@@ -1,6 +1,6 @@
 //
 //  FourierDescriptorApp | Pure Data Japan 1st Session @ Shibuya 2.5D
-//  Created by Tatsuya Ogusu 2013/05/29
+//  Created by Tatsuya Ogusu 2013/05/29~
 //  http://ogsn.org @TatsuyaOGs
 //  license http://creativecommons.org/licenses/by/3.0/
 //

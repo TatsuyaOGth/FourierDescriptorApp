@@ -1,6 +1,6 @@
 //
 //  FourierDescriptorApp | Pure Data Japan 1st Session @ Shibuya 2.5D
-//  Created by Tatsuya Ogusu 2013/05/29
+//  Created by Tatsuya Ogusu 2013/05/29~
 //  http://ogsn.org @TatsuyaOGs
 //  license http://creativecommons.org/licenses/by/3.0/
 //
@@ -18,8 +18,13 @@ Figure::Figure()
     mAlive = true;
     mAlp = 255;
     
-    mMode = AROUND_MODE;
+    mMode = STATIC;
     mCurrentAroundNum = 0;
+}
+
+Figure::~Figure()
+{
+    
 }
 
 /**
@@ -27,16 +32,6 @@ Figure::Figure()
  */
 void Figure::update()
 {
-    mPosX += mSpX;
-    mPosY += mSpY;
-    mPosZ += mSpZ;
-    if (mAlp > 0) mAlp--;
-    else mAlive = false;
-    
-    // Around Mode
-    if (mMode == AROUND_MODE) {
-        mCurrentAroundNum = (mCurrentAroundNum + 1) % mEdgePts.size();
-    }
 }
 
 /**
@@ -44,45 +39,103 @@ void Figure::update()
  */
 void Figure::draw()
 {
-    ofPushMatrix();
-    ofPushStyle();
+    ofEnableAlphaBlending();
 
-    ofTranslate(mPosX, mPosY, mPosZ);
-    ofSetColor(255, 255, 255, mAlp);
-
-    if(mPts.size() > 0) {
-        int numPts = mPts.size();
-        int rescaleRes = 1;
-        mVecOut.fill();
-        mVecOut.beginShape();
-        for(int i = 0; i < numPts; i++){
-            if(i == 0 || i == numPts -1){
-                mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+    //==========
+    // Static Mode
+    //==========
+    if (mMode == STATIC) {
+        ofPushStyle();
+        ofSetColor(255, 255, 255);
+        if(mPts.size() > 0) {
+            int numPts = mPts.size();
+            int rescaleRes = 1;
+            mVecOut.fill();
+            mVecOut.beginShape();
+            for(int i = 0; i < numPts; i++){
+                if(i == 0 || i == numPts -1){
+                    mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+                }
+                if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
             }
-            if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+            mVecOut.endShape();
         }
-        mVecOut.endShape();
+        ofPopStyle();
     }
-    ofPopStyle();
-
-    // Around Mode
-    ofPushStyle();
-    if (mMode == AROUND_MODE) {
-        //重心を計算
-        float sumX = 0;
-        float sumY = 0;
-        for (int i = 0; i < mEdgePts.size(); i++) {
-            sumX += mEdgePts[i].x;
-            sumY += mEdgePts[i].y;
+    
+    //==========
+    // Floating Mode
+    //==========
+    else if (mMode == FLORTING) {
+        mPosX += mSpX;
+        mPosY += mSpY;
+        mPosZ += mSpZ;
+        if (mAlp > 0) mAlp--;
+        else mAlive = false;
+        
+        ofPushMatrix();
+        ofPushStyle();
+        
+        ofTranslate(mPosX, mPosY, mPosZ);
+        ofSetColor(255, 255, 255, mAlp);
+        
+        if(mPts.size() > 0) {
+            int numPts = mPts.size();
+            int rescaleRes = 1;
+            mVecOut.fill();
+            mVecOut.beginShape();
+            for(int i = 0; i < numPts; i++){
+                if(i == 0 || i == numPts -1){
+                    mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+                }
+                if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+            }
+            mVecOut.endShape();
         }
-        mCentPos.set(sumX/mEdgePts.size(), sumY/mEdgePts.size());
+        ofPopMatrix();
+        ofPopStyle();
+    }
+        
+    //==========
+    // Around Mode
+    //==========
+    else if (mMode == AROUND) {
+//        mCurrentAroundNum = (mCurrentAroundNum + 1) % mEdgePts.size();
+        
+        ofPushStyle();
+        ofSetColor(255, 255, 255);
+
+        if(mPts.size() > 0) {
+            int numPts = mPts.size();
+            int rescaleRes = 1;
+            mVecOut.noFill();
+            mVecOut.beginShape();
+            for(int i = 0; i < numPts; i++){
+                if(i == 0 || i == numPts -1){
+                    mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+                }
+                if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+            }
+            mVecOut.endShape();
+        }
+        // edge points
+        ofFill();
+        for (int i=0; i < mEdgePts.size(); i++) {
+            ofFill();
+            ofSetColor(255,0,0);
+            ofCircle(mEdgePts[i], 2);
+        }
+        // centroid point
         ofSetColor(255, 255, 0);
         ofCircle(mCentPos, 5);
+        // around points
+        ofLine(mCentPos, mEdgePts[mCurrentAroundNum]);
+        ofSetColor(255, 0, 0);
+        ofCircle(mEdgePts[mCurrentAroundNum], 5);
+        ofPopStyle();
     }
-    ofPopStyle();
 
-    
-    ofPopMatrix();
+    ofDisableAlphaBlending();
 }
 
 /**
@@ -90,16 +143,9 @@ void Figure::draw()
  */
 void Figure::debugDraw()
 {
-    ofPushMatrix();
     ofPushStyle();
-    ofTranslate(mPosX, mPosY, mPosZ);
-    for (int i=0; i < mEdgePts.size(); i++) {
-        ofFill();
-        ofSetColor(255, 0, 0);
-        ofCircle(mEdgePts[i], 2);
-    }
+    //必要なら何か追加
     ofPopStyle();
-    ofPopMatrix();
 }
 
 /**
@@ -124,6 +170,16 @@ void Figure::setPts(const vector<ofPoint> pts)
 void Figure::setEdgePts(const vector<ofPoint> edgePts)
 {
     mEdgePts = edgePts;
+    
+    //重心を計算
+    float sumX = 0;
+    float sumY = 0;
+    for (int i = 0; i < mEdgePts.size(); i++) {
+        sumX += mEdgePts[i].x;
+        sumY += mEdgePts[i].y;
+    }
+    mCentPos.set(sumX/mEdgePts.size(), sumY/mEdgePts.size());
+
 }
 
 /**
@@ -140,15 +196,20 @@ bool Figure::getAlive()
 void Figure::setMode(const FigureMode mode)
 {
     mMode = mode;
-    
-    if (mMode == AROUND_MODE) {
-        //重心を計算
-        float sumX = 0;
-        float sumY = 0;
-        for (int i = 0; i < mEdgePts.size(); i++) {
-            sumX += mEdgePts[i].x;
-            sumY += mEdgePts[i].y;
-        }
-        mCentPos.set(sumX/mEdgePts.size(), sumY/mEdgePts.size());
-    }
+}
+
+/**
+ 現在の周回点をセット
+ */
+void Figure::setCurrentAroundNum(const int num)
+{
+    mCurrentAroundNum = num % mEdgePts.size();
+}
+
+/**
+ 現在の周回点をインクリメント
+ */
+void Figure::plusCurrentAroundNum()
+{
+    mCurrentAroundNum = (mCurrentAroundNum + 1) % mEdgePts.size();
 }

@@ -1,6 +1,6 @@
 //
 //  FourierDescriptorApp | Pure Data Japan 1st Session @ Shibuya 2.5D
-//  Created by Tatsuya Ogusu 2013/05/29
+//  Created by Tatsuya Ogusu 2013/05/29~
 //  http://ogsn.org @TatsuyaOGs
 //  license http://creativecommons.org/licenses/by/3.0/
 //
@@ -12,8 +12,9 @@
 #include "ofxVectorGraphics.h"
 
 enum FigureMode{
-    STATIC_MODE=0,
-    AROUND_MODE
+    STATIC=0,
+    FLORTING,
+    AROUND
 };
 
 /**
@@ -24,6 +25,7 @@ class Figure {
 public:
     
     Figure();
+    ~Figure();
 
     void update();
     void draw();
@@ -34,7 +36,11 @@ public:
     void setPts(const vector<ofPoint> pts);
     void setEdgePts(const vector<ofPoint> edgePts);
     void setMode(const FigureMode mode);
+    void setCurrentAroundNum(const int num);
+    void plusCurrentAroundNum();
     int getID(){return mID;};
+    int getModeID(){return (int)mMode;};
+    vector<double> getBits(){return mBits;};
     bool getAlive();
     
 private:
@@ -43,6 +49,7 @@ private:
     ofxVectorGraphics mVecOut;
     vector<ofPoint> mPts;
     vector<ofPoint> mEdgePts;
+    vector<double> mBits;
     bool mAlive;
     int mAlp;
     

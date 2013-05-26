@@ -1,6 +1,6 @@
 //
 //  FourierDescriptorApp | Pure Data Japan 1st Session @ Shibuya 2.5D
-//  Created by Tatsuya Ogusu 2013/05/29
+//  Created by Tatsuya Ogusu 2013/05/29~
 //  http://ogsn.org @TatsuyaOGs
 //  license http://creativecommons.org/licenses/by/3.0/
 //
@@ -11,13 +11,6 @@
 #include "ofxVectorGraphics.h"
 #include "ofxOsc.h"
 #include "Figure.h"
-
-/** 波形パラメータ構造体 */
-typedef struct _wave{
-    double dist;
-    double bit;
-    ofPoint contPts; //!<計算した輪郭座標点配列
-} wave;
 
 /**
  メインクラス
@@ -45,16 +38,17 @@ public:
 private:
     
     void calcFourier();
-    vector<wave> getShapeFrequency(const ofImage src, const unsigned interval);
-    void sendSet();
+    void sendSet(const int modeId, const int figId);
+    void sendModeId(const int modeId);
     void sendFigId(const int figId);
-    void sendBits();
+    void sendBits(const int modeId, const int figId);
         
     ofxVectorGraphics mVecOut;
-    vector<ofPoint> mPts; //!< 描画した線の点配列
+    vector<ofPoint> mPts; //!< 描画した線の座標点配列
+    vector<ofPoint> mResizedPts; //!< mPtsをインターバルをとって配置した座標配列
     ofImage mGrabImage;
     ofImage mTmpWindow;
-    vector<wave> mEdgeBits; //!< mPtsを波形変換したもの
+    vector<double> mEdgeBits; //!< mPtsを波形変換したもの
     unsigned int mInterval;
     
     ofRectangle mPtsRect;
@@ -64,11 +58,11 @@ private:
     bool bProcessGetDraw;
     bool bCircleMode;
     
-    vector<Figure> mFigures;
+    vector<vector<Figure> > mFigures;
+    FigureMode mFMode; //!< 図形インスタンスを生成する際のモード指定用
     
     //osc
     ofxOscSender sender;
-    
     
     //Audio in
     vector <float> mLefts;
