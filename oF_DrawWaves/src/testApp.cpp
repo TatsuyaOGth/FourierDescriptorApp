@@ -13,7 +13,8 @@ bool isSide(int i, int x, int h);
 vector<ofPoint> getContourPoints(const ofPixels src);
 
 static const string         HOST = "localhost";
-static const unsigned int   PORT = 50001;
+static const unsigned int   SEND_PORT = 50001;
+static const unsigned int   RECEIVE_PORT = 50000;
 static const int            MAX_FIG_ID = 30;
 
 //--------------------------------------------------------------
@@ -36,7 +37,9 @@ void testApp::setup()
     mPtsRect.set(-1, -1, -1, -1);
     
     //osc
-    sender.setup(HOST, PORT);
+    sender.setup(HOST, SEND_PORT);
+    receiver.setup(RECEIVE_PORT);
+    
     mFMode = STATIC;
     
     //予めモード数の分要素数を確保
@@ -73,12 +76,22 @@ void testApp::update()
             }
         }
     }
-    //図形クラスを更新
-    for (int i=0; i < mFigures.size(); i++) {
-        for (int j=0; j < mFigures[i].size(); j++) {
-            mFigures[i][j].update();
+    //OSC受信による図形の更新
+    while (receiver.hasWaitingMessages()) {
+        ofxOscMessage m;
+        receiver.getNextMessage(&m);
+        if (m.getAddress() == "/around_num") {
+            for (int i=0; i < mFigures.size(); i++) {
+                for (int j=0; j < mFigures[i].size(); j++) {
+                    if (m.getArgAsInt32(0) == j) {
+                        int tmp = ofMap(m.getArgAsInt32(1), 0, 255, 0, mFigures[i][j].getEdgePts().size());
+                        mFigures[i][j].setCurrentAroundNum(tmp);
+                    }
+                }
+            }
         }
     }
+
     
     //----------
     // Sound
@@ -234,9 +247,9 @@ void testApp::draw()
             //----------
             sendModeId((int)mFMode);
             switch (mFMode) {
-                case STATIC: sendFigId(mFigures[0].size()-1); break;
-                case FLORTING: sendFigId(mFigures[1].size()-1); break;
-                case AROUND:sendFigId(mFigures[2].size()-1); break;
+                case STATIC: sendBits(0, mFigures[0].size()-1); break;
+                case FLORTING: sendBits(1, mFigures[1].size()-1); break;
+                case AROUND: sendBits(2, mFigures[2].size()-1); break;
             }
             
             mPts.clear();
@@ -884,7 +897,7 @@ void testApp::sendBits(const int modeId, const int figId)
 {
     if (mEdgeBits.size()) {
         ofxOscMessage m;
-        m.setAddress("/bits");
+        m.setAddress("/bitset");
         m.addIntArg(modeId);
         m.addIntArg(figId);
         sender.sendMessage(m);
@@ -892,6 +905,7 @@ void testApp::sendBits(const int modeId, const int figId)
         double tBit = 0;
         for (int i=0; i < 255; i++) {
             m.clear();
+            m.setAddress("/bits");
             int j = (int)(ofMap(i, 0, 255, 0, mEdgeBits.size()));
             m.addFloatArg((float)mEdgeBits[j]);
             m.addIntArg(i);

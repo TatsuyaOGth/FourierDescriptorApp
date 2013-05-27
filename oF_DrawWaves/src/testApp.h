@@ -63,6 +63,7 @@ private:
     
     //osc
     ofxOscSender sender;
+    ofxOscReceiver receiver;
     
     //Audio in
     vector <float> mLefts;

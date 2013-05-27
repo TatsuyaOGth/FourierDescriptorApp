@@ -20,6 +20,7 @@ Figure::Figure()
     
     mMode = STATIC;
     mCurrentAroundNum = 0;
+    mCentPos.set(0, 0);
 }
 
 Figure::~Figure()
@@ -129,9 +130,11 @@ void Figure::draw()
         ofSetColor(255, 255, 0);
         ofCircle(mCentPos, 5);
         // around points
-        ofLine(mCentPos, mEdgePts[mCurrentAroundNum]);
-        ofSetColor(255, 0, 0);
-        ofCircle(mEdgePts[mCurrentAroundNum], 5);
+        if (mEdgePts.size()) {
+            ofLine(mCentPos, mEdgePts[mCurrentAroundNum]);
+            ofSetColor(255, 0, 0);
+            ofCircle(mEdgePts[mCurrentAroundNum], 10);
+        }
         ofPopStyle();
     }
 
@@ -179,7 +182,14 @@ void Figure::setEdgePts(const vector<ofPoint> edgePts)
         sumY += mEdgePts[i].y;
     }
     mCentPos.set(sumX/mEdgePts.size(), sumY/mEdgePts.size());
+}
 
+/**
+ 描画時のサイズからインターバルをとった輪郭点座標配列をセット
+ */
+void Figure::setResizedPts(const vector<ofPoint> resizedPts)
+{
+    mResizedPts = resizedPts;
 }
 
 /**

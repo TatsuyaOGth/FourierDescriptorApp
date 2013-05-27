@@ -35,12 +35,14 @@ public:
     void setID(const int ID);
     void setPts(const vector<ofPoint> pts);
     void setEdgePts(const vector<ofPoint> edgePts);
+    void setResizedPts(const vector<ofPoint> resizedPts);
     void setMode(const FigureMode mode);
     void setCurrentAroundNum(const int num);
     void plusCurrentAroundNum();
-    int getID(){return mID;};
-    int getModeID(){return (int)mMode;};
-    vector<double> getBits(){return mBits;};
+    int getID() const {return mID;};
+    int getModeID() const {return (int)mMode;};
+    vector<ofPoint> getEdgePts() const {return mEdgePts;};
+    vector<double> getBits() const {return mBits;};
     bool getAlive();
     
 private:
@@ -49,6 +51,7 @@ private:
     ofxVectorGraphics mVecOut;
     vector<ofPoint> mPts;
     vector<ofPoint> mEdgePts;
+    vector<ofPoint> mResizedPts;
     vector<double> mBits;
     bool mAlive;
     int mAlp;
