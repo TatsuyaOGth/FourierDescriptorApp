@@ -12,15 +12,19 @@ Figure::Figure()
     mPosX = 0;
     mPosY = 0;
     mPosZ = 0;
-    mSpX = ofRandom(-1,1);
-    mSpY = ofRandom(-1,1);
-    mSpZ = ofRandom(-2,0);
+    mSpX = 0;//ofRandom(-1,1);
+    mSpY = 0;//ofRandom(-1,1);
+    mSpZ = ofRandom(0,5);
     mAlive = true;
     mAlp = 255;
     
     mMode = STATIC;
     mCurrentAroundNum = 0;
     mCentPos.set(0, 0);
+    
+    mSeqNum = -1;
+    
+    mVol = 0;
 }
 
 Figure::~Figure()
@@ -46,8 +50,15 @@ void Figure::draw()
     // Static Mode
     //==========
     if (mMode == STATIC) {
+        if (mAlp > 60) mAlp -= 8;
+        
         ofPushStyle();
-        ofSetColor(255, 255, 255);
+        if (mSeqNum == mID) {
+            ofSetColor(255);
+            mAlp = 255;
+        } else {
+            ofSetColor(mAlp);
+        }
         if(mPts.size() > 0) {
             int numPts = mPts.size();
             int rescaleRes = 1;
@@ -106,34 +117,34 @@ void Figure::draw()
         ofPushStyle();
         ofSetColor(255, 255, 255);
 
-        if(mPts.size() > 0) {
-            int numPts = mPts.size();
-            int rescaleRes = 1;
-            mVecOut.noFill();
-            mVecOut.beginShape();
-            for(int i = 0; i < numPts; i++){
-                if(i == 0 || i == numPts -1){
-                    mVecOut.curveVertex(mPts[i].x, mPts[i].y);
-                }
-                if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
-            }
-            mVecOut.endShape();
-        }
+//        if(mPts.size() > 0) {
+//            int numPts = mPts.size();
+//            int rescaleRes = 1;
+//            mVecOut.noFill();
+//            mVecOut.beginShape();
+//            for(int i = 0; i < numPts; i++){
+//                if(i == 0 || i == numPts -1){
+//                    mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+//                }
+//                if(i % rescaleRes == 0) mVecOut.curveVertex(mPts[i].x, mPts[i].y);
+//            }
+//            mVecOut.endShape();
+//        }
         // edge points
         ofFill();
         for (int i=0; i < mEdgePts.size(); i++) {
             ofFill();
-            ofSetColor(255,0,0);
-            ofCircle(mEdgePts[i], 2);
+            ofSetColor(127);
+            ofCircle(mEdgePts[i], mVol * 10 + 2);
         }
         // centroid point
-        ofSetColor(255, 255, 0);
-        ofCircle(mCentPos, 5);
+//        ofSetColor(255);
+//        ofCircle(mCentPos, 5);
         // around points
         if (mEdgePts.size()) {
             ofLine(mCentPos, mEdgePts[mCurrentAroundNum]);
-            ofSetColor(255, 0, 0);
-            ofCircle(mEdgePts[mCurrentAroundNum], 10);
+            ofSetColor(255);
+            ofCircle(mEdgePts[mCurrentAroundNum], mVol * 100 + 10);
         }
         ofPopStyle();
     }
@@ -222,4 +233,9 @@ void Figure::setCurrentAroundNum(const int num)
 void Figure::plusCurrentAroundNum()
 {
     mCurrentAroundNum = (mCurrentAroundNum + 1) % mEdgePts.size();
+}
+
+void Figure::setSeqNum(const int num)
+{
+    mSeqNum = num;
 }

@@ -22,6 +22,7 @@ public:
     void update();
     void draw();
     void debugDraw();
+    void exit();
     
     void keyPressed  (int key);
     void keyReleased(int key);
@@ -42,6 +43,7 @@ private:
     void sendModeId(const int modeId);
     void sendFigId(const int figId);
     void sendBits(const int modeId, const int figId);
+    void sendPos(const int modeId, const int figId, const ofPoint pos);
         
     ofxVectorGraphics mVecOut;
     vector<ofPoint> mPts; //!< 描画した線の座標点配列
@@ -64,6 +66,7 @@ private:
     //osc
     ofxOscSender sender;
     ofxOscReceiver receiver;
+    int mSeqCurrentNum; //!< OSCで送られてくるシーケンサーの現在の数値
     
     //Audio in
     vector <float> mLefts;

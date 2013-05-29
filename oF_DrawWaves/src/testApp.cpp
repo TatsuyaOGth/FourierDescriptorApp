@@ -39,6 +39,7 @@ void testApp::setup()
     //osc
     sender.setup(HOST, SEND_PORT);
     receiver.setup(RECEIVE_PORT);
+    mSeqCurrentNum = 0;
     
     mFMode = STATIC;
     
@@ -76,13 +77,14 @@ void testApp::update()
             }
         }
     }
+    
     //OSC受信による図形の更新
     while (receiver.hasWaitingMessages()) {
         ofxOscMessage m;
         receiver.getNextMessage(&m);
-        if (m.getAddress() == "/around_num") {
-            for (int i=0; i < mFigures.size(); i++) {
-                for (int j=0; j < mFigures[i].size(); j++) {
+        for (int i=0; i < mFigures.size(); i++) {
+            for (int j=0; j < mFigures[i].size(); j++) {
+                if (mFigures[i][j].getModeID() == AROUND && m.getAddress() == "/around_num") {
                     if (m.getArgAsInt32(0) == j) {
                         int tmp = ofMap(m.getArgAsInt32(1), 0, 255, 0, mFigures[i][j].getEdgePts().size());
                         mFigures[i][j].setCurrentAroundNum(tmp);
@@ -90,8 +92,18 @@ void testApp::update()
                 }
             }
         }
+        
+        //OSCで送られてくるシーケンサーの現在の数値を取得
+        if (m.getAddress() == "/seq") {
+            mSeqCurrentNum = m.getArgAsInt32(0);
+        }
     }
-
+    
+    //STATICモードのシーケンサーを更新
+    for (int i=0; i < mFigures[0].size(); i++) {
+        mFigures[0][i].setSeqNum(mSeqCurrentNum);
+    }
+    
     
     //----------
     // Sound
@@ -100,7 +112,14 @@ void testApp::update()
     mVolHistory.push_back( mScaledVol );
     if (mVolHistory.size() >= 400 ){
 		mVolHistory.erase(mVolHistory.begin(), mVolHistory.begin()+1);
-	}
+	}    
+    //図形に音量値を渡す
+    for (int i = 0; i < mFigures.size(); i++) {
+        for (int j = 0; j < mFigures[i].size(); j++) {
+            mFigures[i][j].mVol = mScaledVol;
+        }
+    }
+
 }
 
 void testApp::draw()
@@ -114,7 +133,7 @@ void testApp::draw()
         mTmpWindow.grabScreen(0, 0, ofGetWidth(), ofGetHeight()); //表示中の画面を取得
         
         //----------
-        // 描画がある場合は周波数表現の計算を開始
+        // 描画がある場合は波形変換を開始
         //----------
         if (mPts.size()) {
             
@@ -206,7 +225,16 @@ void testApp::draw()
             // Figureクラスのインスタンスを生成して輪郭座標点を渡す
             //----------
             Figure tmpF;
-            tmpF.setID(1);
+            
+            //図形IDを設定
+            if (mFMode==STATIC) {
+                //STATICモードの場合はOSCで送られてくるシーケンサーの現在の数値をIDとする
+                tmpF.setID(mSeqCurrentNum);
+            } else if (mFMode==FLORTING) {
+                tmpF.setID(0);
+            } else if (mFMode==AROUND) {
+                tmpF.setID(mFigures[2].size());
+            }
             
             //円モードの場合は計算に使用した輪郭点を描画点として置き換える
             if (bCircleMode) {
@@ -243,12 +271,12 @@ void testApp::draw()
             
             //----------
             // OSCでもろもろ送信
-            // 1.モードID 2.図形ID 3.全ビット
+            // 1.モードID 2.図形ID 3.全ビット 4.重心座標
             //----------
             sendModeId((int)mFMode);
             switch (mFMode) {
-                case STATIC: sendBits(0, mFigures[0].size()-1); break;
-                case FLORTING: sendBits(1, mFigures[1].size()-1); break;
+                case STATIC: sendBits(0, tmpF.getID()); sendPos(0, tmpF.getID(), tmpF.getCentPos()); break;
+                case FLORTING: sendBits(1, 0); sendPos(1, 0, tmpF.getCentPos()); break;
                 case AROUND: sendBits(2, mFigures[2].size()-1); break;
             }
             
@@ -409,6 +437,7 @@ void testApp::debugDraw()
         str << "display width   : " << ofGetWidth() << endl
         << "display height  : " << ofGetHeight() << endl
         << "Points Interval : " << mInterval << endl
+        << "Seq num : " << mSeqCurrentNum << endl
         ;
         if (bCircleMode) str << "Circle Mode ON" << endl;
         ofSetColor(255);
@@ -432,7 +461,7 @@ void testApp::debugDraw()
         ofSetLineWidth(1);
         ofRect(0, 0, 256, 100);
         
-        ofSetColor(0, 255, 0);
+        ofSetColor(180);
         ofSetLineWidth(2);
         
         ofBeginShape();
@@ -454,13 +483,19 @@ void testApp::debugDraw()
         ofDrawBitmapString("Peak: " + ofToString(mScaledVol * 100.0, 0), 4, 18);
         ofRect(0, 0, 100, 100);
         
-        ofSetColor(245, 58, 135);
+        ofSetColor(180);
         ofFill();
         ofCircle(50, 50, mScaledVol * 100.0f);
         
         ofPopMatrix();
         ofPopStyle();
+        
     }
+}
+
+//--------------------------------------------------------------
+void testApp::exit(){
+    
 }
 
 //--------------------------------------------------------------
@@ -881,10 +916,13 @@ void testApp::sendFigId(const int figID)
 void testApp::sendSet(const int modeId, const int figId)
 {
     ofxOscMessage m;
-    m.setAddress("/set");
+    m.setAddress("/bitset");
     m.addIntArg(modeId);
     m.addIntArg(figId);
-    m.addStringArg("set");
+    sender.sendMessage(m);
+    m.clear();
+    m.setAddress("/set");
+    m.addStringArg("bang");
     sender.sendMessage(m);
 }
 
@@ -912,4 +950,18 @@ void testApp::sendBits(const int modeId, const int figId)
             sender.sendMessage(m);
         }
     }
+}
+
+void testApp::sendPos(const int modeId, const int figId, const ofPoint pos)
+{
+    ofxOscMessage m;
+    m.setAddress("/bitset");
+    m.addIntArg(modeId);
+    m.addIntArg(figId);
+    sender.sendMessage(m);
+    m.clear();
+    m.setAddress("/pos");
+    m.addFloatArg(pos.x/ofGetWidth());
+    m.addFloatArg(pos.y/ofGetHeight());
+    sender.sendMessage(m);
 }

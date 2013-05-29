@@ -39,11 +39,15 @@ public:
     void setMode(const FigureMode mode);
     void setCurrentAroundNum(const int num);
     void plusCurrentAroundNum();
+    void setSeqNum(const int num);
     int getID() const {return mID;};
     int getModeID() const {return (int)mMode;};
     vector<ofPoint> getEdgePts() const {return mEdgePts;};
     vector<double> getBits() const {return mBits;};
+    ofPoint getCentPos() const {return mCentPos;};
     bool getAlive();
+    
+    float mVol;
     
 private:
     
@@ -55,17 +59,19 @@ private:
     vector<double> mBits;
     bool mAlive;
     int mAlp;
+    int mPtsMinus;
     
     //update
     float mPosX, mPosY, mPosZ;
     float mSpX, mSpY, mSpZ;
     
     FigureMode mMode;
-    
+
     ofPoint mCentPos;
     int mCurrentAroundNum;
     
-        
+    int mSeqNum;
+    
 };
 
 #endif /* defined(__DrawWave__Figure__) */
