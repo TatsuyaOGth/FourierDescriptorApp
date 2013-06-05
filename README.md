@@ -1,3 +1,4 @@
+※このREADMEは2013.05.29に渋谷2.5Dで行われたPure Data Japan 1st Sessionの来場者得点CD-Rに収められているものそのままです。最新バージョンは仕様が異なります。
 # FourierDescriptorApp [取扱説明書:README]
 ### Pure Data Japan 1st Session - 2013.05.29 -
 

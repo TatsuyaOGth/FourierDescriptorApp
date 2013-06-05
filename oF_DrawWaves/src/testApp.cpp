@@ -276,7 +276,7 @@ void testApp::draw()
             sendModeId((int)mFMode);
             switch (mFMode) {
                 case STATIC: sendBits(0, tmpF.getID()); sendPos(0, tmpF.getID(), tmpF.getCentPos()); break;
-                case FLORTING: sendBits(1, 0); sendPos(1, 0, tmpF.getCentPos()); break;
+                case FLORTING: sendBits(1, mFigures[1].size()%2); sendPos(1, mFigures[1].size()%2, tmpF.getCentPos()); break;
                 case AROUND: sendBits(2, mFigures[2].size()-1); break;
             }
             
